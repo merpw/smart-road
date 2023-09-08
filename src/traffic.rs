@@ -1,5 +1,5 @@
-use rand::Rng;
 use crate::car::{Car, ComingFrom};
+use rand::Rng;
 
 #[derive(Debug)]
 pub struct TrafficState {
@@ -12,7 +12,7 @@ pub struct TrafficState {
     pub to_south: Vec<Car>,
     pub to_west: Vec<Car>,
     pub allow_new_car: [bool; 4],
-    pub lights: [bool; 4]
+    pub lights: [bool; 4],
 }
 
 impl TrafficState {
@@ -27,7 +27,7 @@ impl TrafficState {
             to_south: Vec::with_capacity(8),
             to_west: Vec::with_capacity(8),
             allow_new_car: [true; 4],
-            lights: [false; 4]
+            lights: [false; 4],
         }
     }
 
@@ -38,25 +38,25 @@ impl TrafficState {
                     self.allow_new_car[0] = false;
                     self.from_north.insert(0, Car::new(coming_from));
                 }
-            },
+            }
             ComingFrom::East => {
                 if self.from_east.len() < 8 && self.allow_new_car[1] {
                     self.allow_new_car[1] = false;
                     self.from_east.insert(0, Car::new(coming_from));
                 }
-            },
+            }
             ComingFrom::South => {
-                if self.from_south.len() < 8 && self.allow_new_car[2]{
+                if self.from_south.len() < 8 && self.allow_new_car[2] {
                     self.allow_new_car[2] = false;
                     self.from_south.insert(0, Car::new(coming_from));
                 }
             }
             ComingFrom::West => {
-                if self.from_west.len() < 8 && self.allow_new_car[3]{
+                if self.from_west.len() < 8 && self.allow_new_car[3] {
                     self.allow_new_car[3] = false;
                     self.from_west.insert(0, Car::new(coming_from));
                 }
-            },
+            }
             ComingFrom::Random => {
                 let car = Car::random(self);
                 match car.coming_from {
@@ -71,5 +71,5 @@ impl TrafficState {
 }
 
 pub fn traffic(ts: &mut TrafficState) {
- todo!()
+    todo!()
 }

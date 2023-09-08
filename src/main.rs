@@ -1,8 +1,10 @@
+mod car;
 mod road;
+mod traffic;
 
-use macroquad::miniquad::window::{set_window_size};
-use macroquad::prelude::*;
 use crate::road::render_roads;
+use macroquad::miniquad::window::set_window_size;
+use macroquad::prelude::*;
 
 const WIDTH: u32 = 1000;
 const HEIGHT: u32 = 1000;
