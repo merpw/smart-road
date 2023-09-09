@@ -1,4 +1,4 @@
-use crate::config::{CAR_SPEED, WINDOW_HEIGHT, WINDOW_WIDTH};
+use crate::config::{CAR_SPEED, WINDOW_SIZE};
 use rand::Rng;
 use std::f32::consts::PI;
 
@@ -71,7 +71,7 @@ impl Car {
                 going,
                 moving: true,
 
-                x: WINDOW_WIDTH as f32 / 2.0,
+                x: WINDOW_SIZE as f32 / 2.0,
                 y: 0.0,
 
                 rotation: PI / 2.0,
@@ -81,8 +81,8 @@ impl Car {
                 going,
                 moving: true,
 
-                x: WINDOW_WIDTH as f32,
-                y: WINDOW_HEIGHT as f32 / 2.0,
+                x: WINDOW_SIZE as f32,
+                y: WINDOW_SIZE as f32 / 2.0,
 
                 rotation: PI,
             },
@@ -91,8 +91,8 @@ impl Car {
                 going,
                 moving: true,
 
-                x: WINDOW_WIDTH as f32 / 2.0,
-                y: WINDOW_HEIGHT as f32,
+                x: WINDOW_SIZE as f32 / 2.0,
+                y: WINDOW_SIZE as f32,
 
                 rotation: 3.0 * PI / 2.0,
             },
@@ -102,7 +102,7 @@ impl Car {
                 moving: true,
 
                 x: 0.0,
-                y: WINDOW_HEIGHT as f32 / 2.0,
+                y: WINDOW_SIZE as f32 / 2.0,
 
                 rotation: 0.0,
             },

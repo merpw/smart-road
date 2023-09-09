@@ -1,9 +1,7 @@
 use macroquad::color::Color;
 use macroquad::window::Conf;
 
-pub const WINDOW_WIDTH: i32 = 1000;
-pub const WINDOW_HEIGHT: i32 = 1000;
-
+pub const WINDOW_SIZE: i32 = 1000;
 pub const ROAD_WIDTH: f32 = 200.0;
 
 pub const ROAD_LINE_WIDTH: f32 = 5.0;
@@ -20,8 +18,8 @@ pub const CAR_SPEED: f32 = 3.0;
 pub fn window_conf() -> Conf {
     Conf {
         window_title: "Road Intersection | Grit:lab".to_owned(),
-        window_width: WINDOW_WIDTH,
-        window_height: WINDOW_HEIGHT,
+        window_width: WINDOW_SIZE,
+        window_height: WINDOW_SIZE,
         window_resizable: false,
         ..Default::default()
     }

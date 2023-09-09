@@ -1,4 +1,4 @@
-use crate::config::{CAR_LENGTH, WINDOW_HEIGHT, WINDOW_WIDTH};
+use crate::config::{CAR_LENGTH, WINDOW_SIZE};
 use crate::traffic::car::DIRECTIONS;
 use crate::traffic::{Car, Direction};
 
@@ -29,8 +29,8 @@ impl TrafficState {
 
         match coming_from {
             Direction::North => prev_car.y >= CAR_LENGTH,
-            Direction::East => WINDOW_WIDTH as f32 - prev_car.x >= CAR_LENGTH,
-            Direction::South => WINDOW_HEIGHT as f32 - prev_car.y >= CAR_LENGTH,
+            Direction::East => WINDOW_SIZE as f32 - prev_car.x >= CAR_LENGTH,
+            Direction::South => WINDOW_SIZE as f32 - prev_car.y >= CAR_LENGTH,
             Direction::West => prev_car.x >= CAR_LENGTH,
         }
     }

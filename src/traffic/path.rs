@@ -1,4 +1,4 @@
-use crate::config::{CAR_PADDING, ROAD_WIDTH, WINDOW_HEIGHT, WINDOW_WIDTH};
+use crate::config::{CAR_PADDING, ROAD_WIDTH, WINDOW_SIZE};
 use crate::traffic::{Direction, Going};
 use macroquad::math::Vec2;
 
@@ -31,18 +31,16 @@ impl Path {
     fn start_point(coming_from: Direction) -> Vec2 {
         match coming_from {
             Direction::North => Vec2::new(
-                WINDOW_WIDTH as f32 / 2.0 - ROAD_WIDTH / 2.0 + CAR_PADDING,
+                WINDOW_SIZE as f32 / 2.0 - ROAD_WIDTH / 2.0 + CAR_PADDING,
                 0.0,
             ),
-            Direction::East => Vec2::new(
-                WINDOW_WIDTH as f32,
-                WINDOW_HEIGHT as f32 / 2.0 - CAR_PADDING,
-            ),
-            Direction::South => Vec2::new(
-                WINDOW_WIDTH as f32 / 2.0 + CAR_PADDING,
-                WINDOW_HEIGHT as f32,
-            ),
-            Direction::West => Vec2::new(0.0, WINDOW_HEIGHT as f32 / 2.0 + CAR_PADDING),
+            Direction::East => {
+                Vec2::new(WINDOW_SIZE as f32, WINDOW_SIZE as f32 / 2.0 - CAR_PADDING)
+            }
+            Direction::South => {
+                Vec2::new(WINDOW_SIZE as f32 / 2.0 + CAR_PADDING, WINDOW_SIZE as f32)
+            }
+            Direction::West => Vec2::new(0.0, WINDOW_SIZE as f32 / 2.0 + CAR_PADDING),
         }
     }
 
@@ -50,16 +48,15 @@ impl Path {
         let destination = coming_from.destination(going_to);
 
         match destination {
-            Direction::North => Vec2::new(WINDOW_WIDTH as f32 / 2.0 + CAR_PADDING, 0.0),
-            Direction::East => Vec2::new(
-                WINDOW_WIDTH as f32,
-                WINDOW_HEIGHT as f32 / 2.0 + CAR_PADDING,
-            ),
+            Direction::North => Vec2::new(WINDOW_SIZE as f32 / 2.0 + CAR_PADDING, 0.0),
+            Direction::East => {
+                Vec2::new(WINDOW_SIZE as f32, WINDOW_SIZE as f32 / 2.0 + CAR_PADDING)
+            }
             Direction::South => Vec2::new(
-                WINDOW_WIDTH as f32 / 2.0 - ROAD_WIDTH / 2.0 + CAR_PADDING,
-                WINDOW_HEIGHT as f32,
+                WINDOW_SIZE as f32 / 2.0 - ROAD_WIDTH / 2.0 + CAR_PADDING,
+                WINDOW_SIZE as f32,
             ),
-            Direction::West => Vec2::new(0.0, WINDOW_HEIGHT as f32 / 2.0 - CAR_PADDING),
+            Direction::West => Vec2::new(0.0, WINDOW_SIZE as f32 / 2.0 - CAR_PADDING),
         }
     }
 
