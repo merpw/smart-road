@@ -5,9 +5,6 @@ use macroquad::color::{BLUE, RED, YELLOW};
 use macroquad::shapes::{draw_rectangle_ex, DrawRectangleParams};
 
 pub fn draw_car(car: &Car) {
-    let x = car.x;
-    let y = car.y;
-
     let color = match car.going {
         Going::Straight => BLUE,
         Going::Right => YELLOW,
@@ -15,8 +12,8 @@ pub fn draw_car(car: &Car) {
     };
 
     draw_rectangle_ex(
-        x,
-        y,
+        car.pos.x,
+        car.pos.y,
         CAR_LENGTH,
         CAR_WIDTH,
         DrawRectangleParams {

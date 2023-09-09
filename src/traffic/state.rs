@@ -18,6 +18,11 @@ impl TrafficState {
         }
     }
 
+    pub fn update(&mut self) {
+        self.cars.iter_mut().for_each(|car| car.update());
+        self.cleanup_cars();
+    }
+
     fn can_add_car(&self, coming_from: Direction) -> bool {
         let prev_car = self.cars.iter().rfind(|c| c.coming_from == coming_from);
 
@@ -28,10 +33,10 @@ impl TrafficState {
         let prev_car = prev_car.unwrap();
 
         match coming_from {
-            Direction::North => prev_car.y >= CAR_LENGTH,
-            Direction::East => WINDOW_SIZE as f32 - prev_car.x >= CAR_LENGTH,
-            Direction::South => WINDOW_SIZE as f32 - prev_car.y >= CAR_LENGTH,
-            Direction::West => prev_car.x >= CAR_LENGTH,
+            Direction::North => prev_car.pos.y >= CAR_LENGTH,
+            Direction::East => WINDOW_SIZE as f32 - prev_car.pos.x >= CAR_LENGTH,
+            Direction::South => WINDOW_SIZE as f32 - prev_car.pos.y >= CAR_LENGTH,
+            Direction::West => prev_car.pos.x >= CAR_LENGTH,
         }
     }
 
@@ -50,6 +55,10 @@ impl TrafficState {
         if self.can_add_car(coming_from) {
             self.cars.push(Car::new(coming_from));
         }
+    }
+
+    pub fn cleanup_cars(&mut self) {
+        self.cars.retain(|car| !car.is_done())
     }
 }
 

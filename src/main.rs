@@ -24,9 +24,9 @@ async fn main() {
     loop {
         handle_input(&mut traffic_state);
 
-        clear_background(BLACK);
+        traffic_state.update();
 
-        traffic_state.cars.iter_mut().for_each(|car| car.update());
+        clear_background(BLACK);
 
         draw_roads();
 

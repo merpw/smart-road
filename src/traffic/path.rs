@@ -2,6 +2,7 @@ use crate::config::{CAR_PADDING, ROAD_WIDTH, WINDOW_SIZE};
 use crate::traffic::{Direction, Going};
 use macroquad::math::Vec2;
 
+#[derive(Debug)]
 pub struct Path {
     points: Vec<Vec2>,
 }
@@ -50,12 +51,12 @@ fn border_point(coming_from: Direction, right_side: bool) -> Vec2 {
 }
 
 /// Returns the point in center associated with the border point
-fn straight_point(direction: Direction, border_point: Vec2, straight_length: f32) -> Vec2 {
+fn straight_point(direction: Direction, border_point: Vec2) -> Vec2 {
     match direction {
-        Direction::North => Vec2::new(border_point.x, border_point.y + straight_length),
-        Direction::East => Vec2::new(border_point.x - straight_length, border_point.y),
-        Direction::South => Vec2::new(border_point.x, border_point.y - straight_length),
-        Direction::West => Vec2::new(border_point.x + straight_length, border_point.y),
+        Direction::North => Vec2::new(border_point.x, border_point.y + STRAIGHT_LENGTH),
+        Direction::East => Vec2::new(border_point.x - STRAIGHT_LENGTH, border_point.y),
+        Direction::South => Vec2::new(border_point.x, border_point.y - STRAIGHT_LENGTH),
+        Direction::West => Vec2::new(border_point.x + STRAIGHT_LENGTH, border_point.y),
     }
 }
 
@@ -71,15 +72,10 @@ impl Path {
                 points: vec![start_point, end_point],
             },
             Going::Left | Going::Right => {
-                let start_strength_length = match going_to {
-                    Going::Left => STRAIGHT_LENGTH + ROAD_WIDTH / 2.0, // TODO: maybe change
-                    _ => STRAIGHT_LENGTH,
-                };
+                let curve_start_point = straight_point(coming_from, start_point);
+                let curve_end_point = straight_point(destination, end_point);
 
-                let curve_start_point =
-                    straight_point(coming_from, start_point, start_strength_length);
-
-                let curve_end_point = straight_point(destination, end_point, STRAIGHT_LENGTH);
+                // TODO: add curve points
 
                 Self {
                     points: vec![start_point, curve_start_point, curve_end_point, end_point],
@@ -90,5 +86,9 @@ impl Path {
 
     pub fn points(&self) -> &Vec<Vec2> {
         &self.points
+    }
+
+    pub fn point(&self, index: usize) -> Option<Vec2> {
+        self.points.get(index).copied()
     }
 }
