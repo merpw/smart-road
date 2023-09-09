@@ -1,5 +1,6 @@
 use crate::config::{WINDOW_HEIGHT, WINDOW_WIDTH};
 use rand::Rng;
+use std::f32::consts::PI;
 
 #[derive(Debug, Eq, PartialEq, Clone, Copy)]
 pub enum ComingFrom {
@@ -32,6 +33,9 @@ pub struct Car {
     pub x: f32,
     pub y: f32,
 
+    /// Rotation of the car in radians, 0 is facing right
+    pub rotation: f32,
+
     pub moving: bool,
 }
 
@@ -47,6 +51,8 @@ impl Car {
 
                 x: WINDOW_WIDTH as f32 / 2.0,
                 y: 0.0,
+
+                rotation: PI / 2.0,
             },
             ComingFrom::East => Car {
                 coming_from,
@@ -55,6 +61,8 @@ impl Car {
 
                 x: WINDOW_WIDTH as f32,
                 y: WINDOW_HEIGHT as f32 / 2.0,
+
+                rotation: PI,
             },
             ComingFrom::South => Car {
                 coming_from,
@@ -63,6 +71,8 @@ impl Car {
 
                 x: WINDOW_WIDTH as f32 / 2.0,
                 y: WINDOW_HEIGHT as f32,
+
+                rotation: 3.0 * PI / 2.0,
             },
             ComingFrom::West => Car {
                 coming_from,
@@ -71,42 +81,11 @@ impl Car {
 
                 x: 0.0,
                 y: WINDOW_HEIGHT as f32 / 2.0,
+
+                rotation: 0.0,
             },
         }
     }
-
-    // pub fn random(ts: &mut TrafficState) -> Car {
-    //     let mut rng = rand::thread_rng();
-    //     loop {
-    //         match rng.gen_range(0..4) {
-    //             0 => {
-    //                 if ts.from_north.len() < 8 && ts.allow_new_car[0] {
-    //                     ts.allow_new_car[0] = false;
-    //                     return Car::new(ComingFrom::North);
-    //                 }
-    //             }
-    //             1 => {
-    //                 if ts.from_east.len() < 8 && ts.allow_new_car[1] {
-    //                     ts.allow_new_car[1] = false;
-    //                     return Car::new(ComingFrom::East);
-    //                 }
-    //             }
-    //             2 => {
-    //                 if ts.from_south.len() < 8 && ts.allow_new_car[2] {
-    //                     ts.allow_new_car[2] = false;
-    //                     return Car::new(ComingFrom::South);
-    //                 }
-    //             }
-    //             _ => {
-    //                 if ts.from_west.len() < 8 && ts.allow_new_car[3] {
-    //                     ts.allow_new_car[3] = false;
-    //                     return Car::new(ComingFrom::West);
-    //                 }
-    //             }
-    //         }
-    //     }
-    // }
-
     pub fn move_car(&mut self) {
         match self.coming_from {
             ComingFrom::North => {
