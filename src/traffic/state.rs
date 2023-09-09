@@ -1,5 +1,8 @@
 use crate::config::{CAR_LENGTH, WINDOW_HEIGHT, WINDOW_WIDTH};
+use crate::traffic::car::COMING_FROM;
 use crate::traffic::{Car, ComingFrom};
+
+use rand::prelude::IteratorRandom;
 
 #[derive(Debug)]
 pub struct TrafficState {
@@ -29,6 +32,17 @@ impl TrafficState {
             ComingFrom::East => WINDOW_WIDTH as f32 - prev_car.x >= CAR_LENGTH,
             ComingFrom::South => WINDOW_HEIGHT as f32 - prev_car.y >= CAR_LENGTH,
             ComingFrom::West => prev_car.x >= CAR_LENGTH,
+        }
+    }
+
+    pub fn add_car_random(&mut self) {
+        let available_coming_from = COMING_FROM
+            .iter()
+            .filter(|cf| self.can_add_car(**cf))
+            .choose(&mut rand::thread_rng());
+
+        if let Some(coming_from) = available_coming_from {
+            self.add_car(*coming_from);
         }
     }
 

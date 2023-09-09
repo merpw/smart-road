@@ -21,6 +21,10 @@ pub fn handle_input(traffic_state: &mut TrafficState) {
     if is_key_pressed(KeyCode::Left) {
         traffic_state.add_car(ComingFrom::East);
     }
+
+    if is_key_pressed(KeyCode::R) {
+        traffic_state.add_car_random();
+    }
 }
 
 // pub struct Control {

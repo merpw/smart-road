@@ -10,7 +10,7 @@ pub enum ComingFrom {
     West,
 }
 
-const COMING_FROM: [ComingFrom; 4] = [
+pub const COMING_FROM: [ComingFrom; 4] = [
     ComingFrom::North,
     ComingFrom::East,
     ComingFrom::South,
@@ -24,7 +24,7 @@ pub enum Going {
     Left,
 }
 
-const GOING: [Going; 3] = [Going::Straight, Going::Right, Going::Left];
+pub const GOING: [Going; 3] = [Going::Straight, Going::Right, Going::Left];
 
 #[derive(Debug)]
 pub struct Car {
