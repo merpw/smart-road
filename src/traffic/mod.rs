@@ -1,6 +1,6 @@
 mod car;
 mod state;
 
-pub use car::{Car, ComingFrom};
+pub use car::{Car, ComingFrom, Going};
 
 pub use state::TrafficState;
