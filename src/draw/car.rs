@@ -17,8 +17,8 @@ pub fn draw_car(car: &Car) {
     draw_rectangle_ex(
         x,
         y,
-        CAR_WIDTH,
         CAR_LENGTH,
+        CAR_WIDTH,
         DrawRectangleParams {
             rotation: car.rotation,
             color,
