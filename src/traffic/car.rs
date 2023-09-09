@@ -1,21 +1,43 @@
-use crate::config::{WINDOW_HEIGHT, WINDOW_WIDTH};
+use crate::config::{CAR_SPEED, WINDOW_HEIGHT, WINDOW_WIDTH};
 use rand::Rng;
 use std::f32::consts::PI;
 
 #[derive(Debug, Eq, PartialEq, Clone, Copy)]
-pub enum ComingFrom {
+pub enum Direction {
     North,
     East,
     South,
     West,
 }
 
-pub const COMING_FROM: [ComingFrom; 4] = [
-    ComingFrom::North,
-    ComingFrom::East,
-    ComingFrom::South,
-    ComingFrom::West,
+pub const DIRECTIONS: [Direction; 4] = [
+    Direction::North,
+    Direction::East,
+    Direction::South,
+    Direction::West,
 ];
+
+impl Direction {
+    pub fn destination(&self, going_to: Going) -> Direction {
+        match (self, going_to) {
+            (Direction::North, Going::Straight) => Direction::South,
+            (Direction::North, Going::Left) => Direction::East,
+            (Direction::North, Going::Right) => Direction::West,
+
+            (Direction::East, Going::Straight) => Direction::West,
+            (Direction::East, Going::Left) => Direction::South,
+            (Direction::East, Going::Right) => Direction::North,
+
+            (Direction::South, Going::Straight) => Direction::North,
+            (Direction::South, Going::Left) => Direction::West,
+            (Direction::South, Going::Right) => Direction::East,
+
+            (Direction::West, Going::Straight) => Direction::East,
+            (Direction::West, Going::Left) => Direction::North,
+            (Direction::West, Going::Right) => Direction::South,
+        }
+    }
+}
 
 #[derive(Debug, Eq, PartialEq, Copy, Clone)]
 pub enum Going {
@@ -28,7 +50,7 @@ pub const GOING: [Going; 3] = [Going::Straight, Going::Right, Going::Left];
 
 #[derive(Debug)]
 pub struct Car {
-    pub coming_from: ComingFrom,
+    pub coming_from: Direction,
     pub going: Going,
     pub x: f32,
     pub y: f32,
@@ -40,11 +62,11 @@ pub struct Car {
 }
 
 impl Car {
-    pub fn new(coming_from: ComingFrom) -> Car {
+    pub fn new(coming_from: Direction) -> Car {
         let going = GOING[rand::thread_rng().gen_range(0..GOING.len())];
 
         match coming_from {
-            ComingFrom::North => Car {
+            Direction::North => Car {
                 coming_from,
                 going,
                 moving: true,
@@ -54,7 +76,7 @@ impl Car {
 
                 rotation: PI / 2.0,
             },
-            ComingFrom::East => Car {
+            Direction::East => Car {
                 coming_from,
                 going,
                 moving: true,
@@ -64,7 +86,7 @@ impl Car {
 
                 rotation: PI,
             },
-            ComingFrom::South => Car {
+            Direction::South => Car {
                 coming_from,
                 going,
                 moving: true,
@@ -74,7 +96,7 @@ impl Car {
 
                 rotation: 3.0 * PI / 2.0,
             },
-            ComingFrom::West => Car {
+            Direction::West => Car {
                 coming_from,
                 going,
                 moving: true,
@@ -86,9 +108,9 @@ impl Car {
             },
         }
     }
-    pub fn move_car(&mut self) {
+    pub fn update(&mut self) {
         match self.coming_from {
-            ComingFrom::North => {
+            Direction::North => {
                 if self.y >= 500.0 {
                     match self.going {
                         Going::Straight => self.down(),
@@ -99,7 +121,7 @@ impl Car {
                     self.down();
                 }
             }
-            ComingFrom::East => {
+            Direction::East => {
                 if self.x <= 500.0 {
                     match self.going {
                         Going::Straight => self.left(),
@@ -110,7 +132,7 @@ impl Car {
                     self.left()
                 }
             }
-            ComingFrom::South => {
+            Direction::South => {
                 if self.y <= 500.0 {
                     match self.going {
                         Going::Straight => self.up(),
@@ -136,15 +158,15 @@ impl Car {
     }
 
     fn up(&mut self) {
-        self.y += 1.0
+        self.y -= CAR_SPEED
     }
     fn down(&mut self) {
-        self.y -= 1.0
+        self.y += CAR_SPEED
     }
     fn right(&mut self) {
-        self.x += 1.0
+        self.x += CAR_SPEED
     }
     fn left(&mut self) {
-        self.x -= 1.0
+        self.x -= CAR_SPEED
     }
 }

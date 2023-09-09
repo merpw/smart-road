@@ -14,6 +14,8 @@ pub const ROAD_LINE_COLOR: Color = Color::new(0.8, 0.8, 0.8, 1.0);
 pub const CAR_WIDTH: f32 = 50.0;
 pub const CAR_LENGTH: f32 = 100.0;
 
+pub const CAR_SPEED: f32 = 3.0;
+
 pub fn window_conf() -> Conf {
     Conf {
         window_title: "Road Intersection | Grit:lab".to_owned(),

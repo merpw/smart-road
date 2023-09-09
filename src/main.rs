@@ -6,11 +6,13 @@ mod traffic;
 
 use macroquad::prelude::*;
 
-use crate::traffic::TrafficState;
+use traffic::TrafficState;
 
-use crate::control::handle_input;
-use crate::draw::{draw_car, draw_roads};
 use config::window_conf;
+
+use control::handle_input;
+
+use draw::{draw_car, draw_roads};
 
 #[macroquad::main(window_conf)]
 async fn main() {
@@ -20,6 +22,8 @@ async fn main() {
         handle_input(&mut traffic_state);
 
         clear_background(BLACK);
+
+        traffic_state.cars.iter_mut().for_each(|car| car.update());
 
         draw_roads();
 

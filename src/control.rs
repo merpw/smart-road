@@ -1,4 +1,4 @@
-use crate::traffic::{ComingFrom, TrafficState};
+use crate::traffic::{Direction, TrafficState};
 use macroquad::prelude::*;
 
 pub fn handle_input(traffic_state: &mut TrafficState) {
@@ -7,47 +7,22 @@ pub fn handle_input(traffic_state: &mut TrafficState) {
     }
 
     if is_key_pressed(KeyCode::Up) {
-        traffic_state.add_car(ComingFrom::South);
+        traffic_state.add_car(Direction::South);
     }
 
     if is_key_pressed(KeyCode::Down) {
-        traffic_state.add_car(ComingFrom::North);
+        traffic_state.add_car(Direction::North);
     }
 
     if is_key_pressed(KeyCode::Right) {
-        traffic_state.add_car(ComingFrom::West);
+        traffic_state.add_car(Direction::West);
     }
 
     if is_key_pressed(KeyCode::Left) {
-        traffic_state.add_car(ComingFrom::East);
+        traffic_state.add_car(Direction::East);
     }
 
     if is_key_pressed(KeyCode::R) {
         traffic_state.add_car_random();
     }
 }
-
-// pub struct Control {
-//     last_spawn_time: Instant,
-// }
-// impl Control {
-//     pub fn new() -> Self {
-//         Self {
-//             last_spawn_time: Instant::now(),
-//         }
-//     }
-
-// pub fn spawn_cars(&mut self, traffic_state: &mut TrafficState) {
-//     // Implement logic for spawning cars at a controlled rate
-//     let now = Instant::now();
-//     let time_since_last_spawn = now.duration_since(self.last_spawn_time);
-//
-//     // Adjust the duration below as needed to control the spawn rate.
-//     let spawn_interval = Duration::from_secs(2);
-//
-//     if time_since_last_spawn >= spawn_interval {
-//         traffic_state.add_car(ComingFrom::Random);
-//         self.last_spawn_time = now;
-//     }
-// }
-// }
