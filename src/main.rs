@@ -1,4 +1,4 @@
-mod car;
+#![allow(dead_code)] // TODO: remove
 mod config;
 mod road;
 mod traffic;

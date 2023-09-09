@@ -33,7 +33,7 @@ impl Car {
             1 => Going::Right,
             _ => Going::Left,
         };
-        return match coming_from {
+        match coming_from {
             ComingFrom::North => Car {
                 coming_from,
                 going,
@@ -62,7 +62,7 @@ impl Car {
                 y: 500.0,
                 moving: true,
             },
-        };
+        }
     }
 
     pub fn random(ts: &mut TrafficState) -> Car {

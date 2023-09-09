@@ -1,6 +1,4 @@
-use crate::car::ComingFrom;
-use crate::traffic::TrafficState;
-use crate::road;
+use crate::traffic::{ComingFrom, TrafficState};
 
 use macroquad::prelude::*;
 use std::time::Duration;
@@ -32,7 +30,7 @@ impl Control {
             _ => {} // Ignore other key presses
         }
     }
-    
+
     pub fn spawn_cars(&mut self, traffic_state: &mut TrafficState) {
         // Implement logic for spawning cars at a controlled rate
         let now = Instant::now();

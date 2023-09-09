@@ -1,5 +1,4 @@
-use crate::car::{Car, ComingFrom};
-use rand::Rng;
+use crate::traffic::{Car, ComingFrom};
 
 #[derive(Debug)]
 pub struct TrafficState {
@@ -70,6 +69,6 @@ impl TrafficState {
     }
 }
 
-pub fn traffic(ts: &mut TrafficState) {
+pub fn traffic(_ts: &mut TrafficState) {
     todo!()
 }
