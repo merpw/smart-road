@@ -1,6 +1,7 @@
 use crate::config::{CAR_LENGTH, CAR_WIDTH};
 use crate::traffic::{Car, Going};
 use macroquad::color::{BLUE, RED, YELLOW};
+use std::ops::Sub;
 
 use macroquad::shapes::{draw_rectangle_ex, DrawRectangleParams};
 
@@ -11,9 +12,16 @@ pub fn draw_car(car: &Car) {
         Going::Left => RED,
     };
 
+    let move_vector = macroquad::math::Vec2::new(
+        car.rotation.cos() * CAR_LENGTH / 2.0,
+        car.rotation.sin() * CAR_LENGTH / 2.0,
+    );
+
+    let pos = car.pos.sub(move_vector);
+
     draw_rectangle_ex(
-        car.pos.x,
-        car.pos.y,
+        pos.x,
+        pos.y,
         CAR_LENGTH,
         CAR_WIDTH,
         DrawRectangleParams {

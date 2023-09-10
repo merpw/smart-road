@@ -35,7 +35,7 @@ pub struct Path {
 // B - straight_point(East, A, STRAIGHT_LENGTH)
 // C - straight_point(South, D, STRAIGHT_LENGTH)
 
-const STRAIGHT_LENGTH: f32 = (WINDOW_SIZE as f32 - ROAD_WIDTH) / 2.0 + CAR_PADDING;
+const STRAIGHT_LENGTH: f32 = (WINDOW_SIZE as f32 - ROAD_WIDTH) / 2.0;
 
 /// Returns the point on the border where the car should appear or disappear
 fn border_point(coming_from: Direction, right_side: bool) -> Vec2 {

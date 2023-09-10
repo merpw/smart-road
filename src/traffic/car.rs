@@ -53,6 +53,8 @@ pub const GOING: [Going; 3] = [Going::Straight, Going::Right, Going::Left];
 pub struct Car {
     pub coming_from: Direction,
     pub going: Going,
+
+    /// Position of the front left corner of the car
     pub pos: Vec2,
 
     /// Rotation of the car in radians, 0 is facing right
