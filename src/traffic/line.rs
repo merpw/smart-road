@@ -1,5 +1,5 @@
 use crate::config::{CAR_LENGTH, CAR_SAFE_DISTANCE, WINDOW_SIZE};
-use crate::traffic::{Car, Direction};
+use crate::traffic::{Car, Direction, Going, Path};
 
 #[derive(Debug)]
 pub enum Light {
@@ -13,6 +13,16 @@ pub struct Line {
 
     pub cars: Vec<Car>,
     pub light: Light,
+
+    pub paths: [Path; 3],
+}
+
+fn get_path(paths: &[Path; 3], going: Going) -> &Path {
+    match going {
+        Going::Straight => &paths[0],
+        Going::Left => &paths[1],
+        Going::Right => &paths[2],
+    }
 }
 
 impl Line {
@@ -22,11 +32,21 @@ impl Line {
 
             cars: Vec::new(),
             light: Light::Red,
+
+            paths: [
+                Path::new(coming_from, Going::Straight),
+                Path::new(coming_from, Going::Left),
+                Path::new(coming_from, Going::Right),
+            ],
         }
     }
 
     pub fn update(&mut self) {
-        self.cars.iter_mut().for_each(|car| car.update());
+        for car in self.cars.iter_mut() {
+            let path = get_path(&self.paths, car.going);
+            car.update(path);
+        }
+
         self.cleanup_cars();
     }
 
@@ -64,6 +84,9 @@ impl Line {
     }
 
     pub fn cleanup_cars(&mut self) {
-        self.cars.retain(|car| !car.is_done())
+        self.cars.retain(|car| {
+            let path = get_path(&self.paths, car.going);
+            !car.is_done(path)
+        })
     }
 }

@@ -61,9 +61,6 @@ pub struct Car {
     pub rotation: f32,
 
     index: usize,
-
-    // TODO: use pointer or store it outside
-    pub path: Path,
 }
 
 impl Car {
@@ -77,15 +74,14 @@ impl Car {
         Self {
             coming_from,
             going,
-            path,
             index: 0,
 
             pos: first_point,
             rotation: 0.0,
         }
     }
-    pub fn update(&mut self) {
-        let next_point = self.path.point(self.index + 1);
+    pub fn update(&mut self, path: &Path) {
+        let next_point = path.point(self.index + 1);
 
         if next_point.is_none() {
             return;
@@ -95,7 +91,7 @@ impl Car {
 
         if vector.length() < CAR_SPEED * 1.0 {
             self.index += 1;
-            self.update();
+            self.update(path);
             return;
         }
 
@@ -106,7 +102,7 @@ impl Car {
         self.pos += vector * CAR_SPEED;
     }
 
-    pub fn is_done(&self) -> bool {
-        self.path.point(self.index + 1).is_none()
+    pub fn is_done(&self, path: &Path) -> bool {
+        path.point(self.index + 1).is_none()
     }
 }

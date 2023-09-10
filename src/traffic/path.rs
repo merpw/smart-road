@@ -6,6 +6,9 @@ use std::ops::{Mul, Sub};
 
 #[derive(Debug)]
 pub struct Path {
+    pub coming_from: Direction,
+    pub going_to: Going,
+
     points: Vec<Vec2>,
 }
 
@@ -71,6 +74,9 @@ impl Path {
 
         match going_to {
             Going::Straight => Self {
+                coming_from,
+                going_to,
+
                 points: vec![start_point, end_point],
             },
             Going::Left | Going::Right => {
@@ -98,6 +104,9 @@ impl Path {
                 let curve = quadratic_curve(curve_start_point, control_point, curve_end_point);
 
                 Self {
+                    coming_from,
+                    going_to,
+
                     points: [start_point, curve_start_point]
                         .into_iter()
                         .chain(curve)

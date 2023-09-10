@@ -6,4 +6,4 @@ pub use roads::draw_roads;
 
 pub use car::draw_car;
 
-pub use path::PathDrawer;
+pub use path::draw_path;

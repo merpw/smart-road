@@ -10,15 +10,13 @@ use config::window_conf;
 
 use control::handle_input;
 
-use crate::draw::PathDrawer;
+use crate::draw::{draw_path, draw_roads};
 use crate::traffic::TrafficState;
-use draw::{draw_car, draw_roads};
+use draw::draw_car;
 
 #[macroquad::main(window_conf)]
 async fn main() {
     let mut traffic_state = TrafficState::new();
-
-    let path_drawer = PathDrawer::new();
 
     loop {
         handle_input(&mut traffic_state);
@@ -29,9 +27,11 @@ async fn main() {
 
         draw_roads();
 
-        path_drawer.draw();
-
         for line in traffic_state.lines.iter() {
+            for path in line.paths.iter() {
+                draw_path(path);
+            }
+
             for car in line.cars.iter() {
                 draw_car(car);
             }
