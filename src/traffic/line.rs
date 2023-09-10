@@ -1,7 +1,7 @@
-use crate::config::{CAR_LENGTH, CAR_SAFE_DISTANCE, WINDOW_SIZE};
+use crate::config::{CAR_LENGTH, CAR_SAFE_DISTANCE, STRAIGHT_LENGTH};
 use crate::traffic::{Car, Direction, Going, Path};
 
-#[derive(Debug)]
+#[derive(Debug, Eq, PartialEq)]
 pub enum Light {
     Red,
     Green,
@@ -47,6 +47,14 @@ impl Line {
         for car in self.cars.iter_mut() {
             let path = get_path(&self.paths, car.going);
 
+            if self.light == Light::Red {
+                let stop_line_distance = STRAIGHT_LENGTH - car.border_distance();
+
+                if stop_line_distance < CAR_SAFE_DISTANCE {
+                    return;
+                }
+            }
+
             car.update(path, prev_car);
 
             prev_car = Some(car);
@@ -67,16 +75,7 @@ impl Line {
 
         let prev_car = prev_car.unwrap();
 
-        match self.coming_from {
-            Direction::North => prev_car.pos.y >= CAR_LENGTH + CAR_SAFE_DISTANCE,
-            Direction::East => {
-                WINDOW_SIZE as f32 - prev_car.pos.x >= CAR_LENGTH + CAR_SAFE_DISTANCE
-            }
-            Direction::South => {
-                WINDOW_SIZE as f32 - prev_car.pos.y >= CAR_LENGTH + CAR_SAFE_DISTANCE
-            }
-            Direction::West => prev_car.pos.x >= CAR_LENGTH + CAR_SAFE_DISTANCE,
-        }
+        prev_car.border_distance() >= CAR_LENGTH + CAR_SAFE_DISTANCE
     }
 
     pub fn add_car(&mut self) {

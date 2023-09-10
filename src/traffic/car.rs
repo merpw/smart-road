@@ -1,7 +1,10 @@
-use crate::config::{CAR_LENGTH, CAR_SAFE_DISTANCE, CAR_SPEED};
+use crate::config::{
+    CAR_LENGTH, CAR_SAFE_DISTANCE, CAR_SPEED, STRAIGHT_LENGTH, TOP_LEFT, TOP_RIGHT, WINDOW_SIZE,
+};
 use crate::traffic::Path;
 use macroquad::math::Vec2;
 use rand::Rng;
+use std::ops::{Add, Sub};
 
 #[derive(Debug, Eq, PartialEq, Clone, Copy)]
 pub enum Direction {
@@ -80,21 +83,29 @@ impl Car {
             rotation: 0.0,
         }
     }
-    pub fn update(&mut self, path: &Path, next_car: Option<&Car>) {
-        if let Some(next_car) = next_car {
-            let vector = next_car.pos - self.pos;
 
-            let distance = vector.length() - CAR_LENGTH;
-
-            if distance < CAR_SAFE_DISTANCE {
-                return;
-            }
+    pub fn border_distance(&self) -> f32 {
+        match self.coming_from {
+            Direction::North => self.pos.y,
+            Direction::East => WINDOW_SIZE as f32 - self.pos.x,
+            Direction::South => WINDOW_SIZE as f32 - self.pos.y,
+            Direction::West => self.pos.x,
         }
+    }
 
+    pub fn update(&mut self, path: &Path, next_car: Option<&Car>) {
         let next_point = path.point(self.index + 1);
 
         if next_point.is_none() {
             return;
+        }
+
+        if let Some(next_car) = next_car {
+            let distance = (next_car.pos - self.pos).length() - CAR_LENGTH;
+
+            if distance < CAR_SAFE_DISTANCE {
+                return;
+            }
         }
 
         let vector = next_point.unwrap() - self.pos;
