@@ -89,18 +89,19 @@ impl Car {
             return;
         }
 
-        let next_point = next_point.unwrap();
-
-        let vector = next_point - self.pos;
+        let vector = next_point.unwrap() - self.pos;
 
         if vector.length() < CAR_SPEED * 1.0 {
             self.index += 1;
+            self.update();
             return;
         }
 
         self.rotation = vector.y.atan2(vector.x);
 
-        self.pos += vector.normalize() * CAR_SPEED;
+        let vector = vector.normalize();
+
+        self.pos += vector * CAR_SPEED;
     }
 
     pub fn is_done(&self) -> bool {

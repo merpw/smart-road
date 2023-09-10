@@ -1,6 +1,8 @@
 use crate::config::{CAR_PADDING, ROAD_WIDTH, WINDOW_SIZE};
+use crate::traffic::curve::quadratic_curve;
 use crate::traffic::{Direction, Going};
 use macroquad::math::Vec2;
+use std::ops::{Mul, Sub};
 
 #[derive(Debug)]
 pub struct Path {
@@ -33,7 +35,7 @@ pub struct Path {
 // B - straight_point(East, A, STRAIGHT_LENGTH)
 // C - straight_point(South, D, STRAIGHT_LENGTH)
 
-const STRAIGHT_LENGTH: f32 = (WINDOW_SIZE as f32 - ROAD_WIDTH) / 2.0;
+const STRAIGHT_LENGTH: f32 = (WINDOW_SIZE as f32 - ROAD_WIDTH) / 2.0 + CAR_PADDING;
 
 /// Returns the point on the border where the car should appear or disappear
 fn border_point(coming_from: Direction, right_side: bool) -> Vec2 {
@@ -75,10 +77,32 @@ impl Path {
                 let curve_start_point = straight_point(coming_from, start_point);
                 let curve_end_point = straight_point(destination, end_point);
 
-                // TODO: add curve points
+                let center = Vec2::new(WINDOW_SIZE as f32 / 2.0, WINDOW_SIZE as f32 / 2.0);
+
+                let control_point = match going_to {
+                    Going::Left => center,
+                    Going::Right => {
+                        // make curve radius smaller by half
+
+                        // vector between curve_start_point and curve_end_point
+                        let line = curve_start_point.sub(curve_end_point);
+
+                        // perpendicular vector from center to line
+                        let radial_vector = Vec2::new(-line.y, line.x);
+
+                        center.sub(radial_vector.mul(0.5))
+                    }
+                    _ => unreachable!(),
+                };
+
+                let curve = quadratic_curve(curve_start_point, control_point, curve_end_point);
 
                 Self {
-                    points: vec![start_point, curve_start_point, curve_end_point, end_point],
+                    points: [start_point, curve_start_point]
+                        .into_iter()
+                        .chain(curve)
+                        .chain([curve_end_point, end_point])
+                        .collect(),
                 }
             }
         }

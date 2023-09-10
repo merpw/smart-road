@@ -1,4 +1,5 @@
 mod car;
+mod curve;
 mod path;
 mod state;
 
