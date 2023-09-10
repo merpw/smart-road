@@ -1,4 +1,4 @@
-use crate::config::CAR_SPEED;
+use crate::config::{CAR_LENGTH, CAR_SAFE_DISTANCE, CAR_SPEED};
 use crate::traffic::Path;
 use macroquad::math::Vec2;
 use rand::Rng;
@@ -80,7 +80,17 @@ impl Car {
             rotation: 0.0,
         }
     }
-    pub fn update(&mut self, path: &Path) {
+    pub fn update(&mut self, path: &Path, next_car: Option<&Car>) {
+        if let Some(next_car) = next_car {
+            let vector = next_car.pos - self.pos;
+
+            let distance = vector.length() - CAR_LENGTH;
+
+            if distance < CAR_SAFE_DISTANCE {
+                return;
+            }
+        }
+
         let next_point = path.point(self.index + 1);
 
         if next_point.is_none() {
@@ -91,7 +101,7 @@ impl Car {
 
         if vector.length() < CAR_SPEED * 1.0 {
             self.index += 1;
-            self.update(path);
+            self.update(path, next_car);
             return;
         }
 

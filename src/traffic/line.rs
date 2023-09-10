@@ -42,9 +42,14 @@ impl Line {
     }
 
     pub fn update(&mut self) {
+        let mut prev_car = None;
+
         for car in self.cars.iter_mut() {
             let path = get_path(&self.paths, car.going);
-            car.update(path);
+
+            car.update(path, prev_car);
+
+            prev_car = Some(car);
         }
 
         self.cleanup_cars();
