@@ -1,4 +1,4 @@
-use crate::config::{CAR_LENGTH, WINDOW_SIZE};
+use crate::config::{CAR_LENGTH, CAR_SAFE_DISTANCE, WINDOW_SIZE};
 use crate::traffic::{Car, Direction};
 
 #[derive(Debug)]
@@ -43,10 +43,14 @@ impl Line {
         let prev_car = prev_car.unwrap();
 
         match self.coming_from {
-            Direction::North => prev_car.pos.y >= CAR_LENGTH,
-            Direction::East => WINDOW_SIZE as f32 - prev_car.pos.x >= CAR_LENGTH,
-            Direction::South => WINDOW_SIZE as f32 - prev_car.pos.y >= CAR_LENGTH,
-            Direction::West => prev_car.pos.x >= CAR_LENGTH,
+            Direction::North => prev_car.pos.y >= CAR_LENGTH + CAR_SAFE_DISTANCE,
+            Direction::East => {
+                WINDOW_SIZE as f32 - prev_car.pos.x >= CAR_LENGTH + CAR_SAFE_DISTANCE
+            }
+            Direction::South => {
+                WINDOW_SIZE as f32 - prev_car.pos.y >= CAR_LENGTH + CAR_SAFE_DISTANCE
+            }
+            Direction::West => prev_car.pos.x >= CAR_LENGTH + CAR_SAFE_DISTANCE,
         }
     }
 
