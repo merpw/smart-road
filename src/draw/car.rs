@@ -13,8 +13,8 @@ pub fn draw_car(car: &Car) {
     };
 
     let move_vector = macroquad::math::Vec2::new(
-        car.rotation.cos() * CAR_LENGTH / 2.0,
-        car.rotation.sin() * CAR_LENGTH / 2.0,
+        car.rotation.cos() * CAR_LENGTH,
+        car.rotation.sin() * CAR_LENGTH,
     );
 
     let pos = car.pos.sub(move_vector);

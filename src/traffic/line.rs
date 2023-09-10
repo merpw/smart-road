@@ -1,4 +1,4 @@
-use crate::config::{CAR_LENGTH, CAR_SAFE_DISTANCE, STRAIGHT_LENGTH};
+use crate::config::{CAR_LENGTH, CAR_SAFE_DISTANCE};
 use crate::traffic::{Car, Direction, Going, Path};
 
 #[derive(Debug, Eq, PartialEq)]
@@ -26,12 +26,12 @@ fn get_path(paths: &[Path; 3], going: Going) -> &Path {
 }
 
 impl Line {
-    pub fn new(coming_from: Direction) -> Self {
+    pub fn new(coming_from: Direction, light: Light) -> Self {
         Line {
             coming_from,
+            light,
 
             cars: Vec::new(),
-            light: Light::Red,
 
             paths: [
                 Path::new(coming_from, Going::Straight),
@@ -41,21 +41,20 @@ impl Line {
         }
     }
 
+    pub fn switch(&mut self) {
+        self.light = match self.light {
+            Light::Red => Light::Green,
+            Light::Green => Light::Red,
+        }
+    }
+
     pub fn update(&mut self) {
         let mut prev_car = None;
 
         for car in self.cars.iter_mut() {
             let path = get_path(&self.paths, car.going);
 
-            if self.light == Light::Red {
-                let stop_line_distance = STRAIGHT_LENGTH - car.border_distance();
-
-                if stop_line_distance < CAR_SAFE_DISTANCE {
-                    return;
-                }
-            }
-
-            car.update(path, prev_car);
+            car.update(path, prev_car, &self.light);
 
             prev_car = Some(car);
         }

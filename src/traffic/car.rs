@@ -1,10 +1,7 @@
-use crate::config::{
-    CAR_LENGTH, CAR_SAFE_DISTANCE, CAR_SPEED, STRAIGHT_LENGTH, TOP_LEFT, TOP_RIGHT, WINDOW_SIZE,
-};
-use crate::traffic::Path;
+use crate::config::{CAR_LENGTH, CAR_SAFE_DISTANCE, CAR_SPEED, STRAIGHT_LENGTH, WINDOW_SIZE};
+use crate::traffic::{Light, Path};
 use macroquad::math::Vec2;
 use rand::Rng;
-use std::ops::{Add, Sub};
 
 #[derive(Debug, Eq, PartialEq, Clone, Copy)]
 pub enum Direction {
@@ -63,7 +60,7 @@ pub struct Car {
     /// Rotation of the car in radians, 0 is facing right
     pub rotation: f32,
 
-    index: usize,
+    point_index: usize,
 }
 
 impl Car {
@@ -77,7 +74,7 @@ impl Car {
         Self {
             coming_from,
             going,
-            index: 0,
+            point_index: 0,
 
             pos: first_point,
             rotation: 0.0,
@@ -93,8 +90,8 @@ impl Car {
         }
     }
 
-    pub fn update(&mut self, path: &Path, next_car: Option<&Car>) {
-        let next_point = path.point(self.index + 1);
+    pub fn update(&mut self, path: &Path, next_car: Option<&Car>, light: &Light) {
+        let next_point = path.point(self.point_index + 1);
 
         if next_point.is_none() {
             return;
@@ -110,9 +107,21 @@ impl Car {
 
         let vector = next_point.unwrap() - self.pos;
 
+        if *light == Light::Red && self.point_index == 0
+        // the car is at the first straight part of the path
+        {
+            // TODO: refactor
+            let border_distance = self.border_distance();
+            if border_distance < STRAIGHT_LENGTH
+                && border_distance + CAR_SPEED * 1.0 + CAR_SAFE_DISTANCE > STRAIGHT_LENGTH
+            {
+                return;
+            }
+        }
+
         if vector.length() < CAR_SPEED * 1.0 {
-            self.index += 1;
-            self.update(path, next_car);
+            self.point_index += 1;
+            self.update(path, next_car, light);
             return;
         }
 
@@ -124,6 +133,6 @@ impl Car {
     }
 
     pub fn is_done(&self, path: &Path) -> bool {
-        path.point(self.index + 1).is_none()
+        path.point(self.point_index + 1).is_none()
     }
 }
