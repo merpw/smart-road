@@ -11,13 +11,6 @@ pub enum Direction {
     West,
 }
 
-pub const DIRECTIONS: [Direction; 4] = [
-    Direction::North,
-    Direction::East,
-    Direction::South,
-    Direction::West,
-];
-
 impl Direction {
     pub fn destination(&self, going_to: Going) -> Direction {
         match (self, going_to) {
@@ -81,6 +74,10 @@ impl Car {
         }
     }
 
+    pub fn is_in_queue(&self) -> bool {
+        self.point_index == 0
+    }
+
     pub fn border_distance(&self) -> f32 {
         match self.coming_from {
             Direction::North => self.pos.y,
@@ -107,7 +104,7 @@ impl Car {
 
         let vector = next_point.unwrap() - self.pos;
 
-        if *light == Light::Red && self.point_index == 0
+        if *light == Light::Red && self.is_in_queue()
         // the car is at the first straight part of the path
         {
             // TODO: refactor

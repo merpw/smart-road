@@ -1,4 +1,3 @@
-#![allow(dead_code)] // TODO: remove
 mod config;
 mod control;
 mod draw;
@@ -33,7 +32,9 @@ async fn main() {
             for path in line.paths.iter() {
                 draw_path(path);
             }
+        }
 
+        for line in traffic_state.lines.iter() {
             for car in line.cars.iter() {
                 draw_car(car);
             }
