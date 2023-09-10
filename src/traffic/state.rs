@@ -1,67 +1,47 @@
-use crate::config::{CAR_LENGTH, WINDOW_SIZE};
-use crate::traffic::car::DIRECTIONS;
-use crate::traffic::{Car, Direction};
+use crate::traffic::{Direction, Line};
 
 use rand::prelude::IteratorRandom;
 
 #[derive(Debug)]
 pub struct TrafficState {
-    pub cars: Vec<Car>,
-    pub lights: [bool; 4],
+    pub lines: [Line; 4],
 }
 
 impl TrafficState {
     pub fn new() -> TrafficState {
         TrafficState {
-            cars: Vec::new(),
-            lights: [false; 4],
+            lines: [
+                Line::new(Direction::North),
+                Line::new(Direction::East),
+                Line::new(Direction::South),
+                Line::new(Direction::West),
+            ],
         }
     }
 
     pub fn update(&mut self) {
-        self.cars.iter_mut().for_each(|car| car.update());
-        self.cleanup_cars();
-    }
-
-    fn can_add_car(&self, coming_from: Direction) -> bool {
-        let prev_car = self.cars.iter().rfind(|c| c.coming_from == coming_from);
-
-        if prev_car.is_none() {
-            return true;
-        }
-
-        let prev_car = prev_car.unwrap();
-
-        match coming_from {
-            Direction::North => prev_car.pos.y >= CAR_LENGTH,
-            Direction::East => WINDOW_SIZE as f32 - prev_car.pos.x >= CAR_LENGTH,
-            Direction::South => WINDOW_SIZE as f32 - prev_car.pos.y >= CAR_LENGTH,
-            Direction::West => prev_car.pos.x >= CAR_LENGTH,
-        }
-    }
-
-    pub fn add_car_random(&mut self) {
-        let available_coming_from = DIRECTIONS
-            .iter()
-            .filter(|cf| self.can_add_car(**cf))
-            .choose(&mut rand::thread_rng());
-
-        if let Some(coming_from) = available_coming_from {
-            self.add_car(*coming_from);
-        }
+        self.lines.iter_mut().for_each(|line| line.update());
     }
 
     pub fn add_car(&mut self, coming_from: Direction) {
-        if self.can_add_car(coming_from) {
-            self.cars.push(Car::new(coming_from));
+        let line = self
+            .lines
+            .iter_mut()
+            .find(|line| line.coming_from == coming_from)
+            .unwrap();
+
+        line.add_car();
+    }
+
+    pub fn add_car_random(&mut self) {
+        let available_lines = self
+            .lines
+            .iter_mut()
+            .filter(|line| line.can_add_car())
+            .choose(&mut rand::thread_rng());
+
+        if let Some(line) = available_lines {
+            line.add_car();
         }
     }
-
-    pub fn cleanup_cars(&mut self) {
-        self.cars.retain(|car| !car.is_done())
-    }
-}
-
-pub fn traffic(_ts: &mut TrafficState) {
-    todo!()
 }

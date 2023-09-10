@@ -6,13 +6,12 @@ mod traffic;
 
 use macroquad::prelude::*;
 
-use traffic::TrafficState;
-
 use config::window_conf;
 
 use control::handle_input;
 
 use crate::draw::PathDrawer;
+use crate::traffic::TrafficState;
 use draw::{draw_car, draw_roads};
 
 #[macroquad::main(window_conf)]
@@ -32,7 +31,11 @@ async fn main() {
 
         path_drawer.draw();
 
-        traffic_state.cars.iter().for_each(draw_car);
+        for line in traffic_state.lines.iter() {
+            for car in line.cars.iter() {
+                draw_car(car);
+            }
+        }
 
         next_frame().await
     }
