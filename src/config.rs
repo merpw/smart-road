@@ -1,4 +1,5 @@
 use macroquad::color::Color;
+use macroquad::math::Vec2;
 use macroquad::window::Conf;
 
 pub const WINDOW_SIZE: i32 = 1000;
@@ -28,3 +29,19 @@ pub fn window_conf() -> Conf {
         ..Default::default()
     }
 }
+
+// Helper constants
+
+pub const STRAIGHT_LENGTH: f32 = (WINDOW_SIZE as f32 - ROAD_WIDTH) / 2.0;
+
+// center square corners
+pub const TOP_LEFT: Vec2 = Vec2::new(STRAIGHT_LENGTH, STRAIGHT_LENGTH);
+
+pub const TOP_RIGHT: Vec2 = Vec2::new(WINDOW_SIZE as f32 - STRAIGHT_LENGTH, STRAIGHT_LENGTH);
+
+pub const BOTTOM_LEFT: Vec2 = Vec2::new(STRAIGHT_LENGTH, WINDOW_SIZE as f32 - STRAIGHT_LENGTH);
+
+pub const BOTTOM_RIGHT: Vec2 = Vec2::new(
+    WINDOW_SIZE as f32 - STRAIGHT_LENGTH,
+    WINDOW_SIZE as f32 - STRAIGHT_LENGTH,
+);
