@@ -8,6 +8,6 @@ pub use car::{Car, Direction, Going};
 
 pub use state::TrafficState;
 
-pub use line::{Light, Line};
+pub use line::Line;
 
 pub use path::Path;

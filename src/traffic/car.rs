@@ -1,5 +1,5 @@
-use crate::config::{CAR_LENGTH, CAR_SAFE_DISTANCE, CAR_SPEED, STRAIGHT_LENGTH, WINDOW_SIZE};
-use crate::traffic::{Light, Path};
+use crate::config::{CAR_LENGTH, CAR_SAFE_DISTANCE, CAR_SPEED, WINDOW_SIZE};
+use crate::traffic::Path;
 use macroquad::math::Vec2;
 use rand::Rng;
 
@@ -73,10 +73,11 @@ impl Car {
             rotation: 0.0,
         }
     }
-
+    /*
     pub fn is_in_queue(&self) -> bool {
         self.point_index == 0
     }
+     */
 
     pub fn border_distance(&self) -> f32 {
         match self.coming_from {
@@ -87,7 +88,7 @@ impl Car {
         }
     }
 
-    pub fn update(&mut self, path: &Path, next_car: Option<&Car>, light: &Light) {
+    pub fn update(&mut self, path: &Path, next_car: Option<&Car>) {
         let next_point = path.point(self.point_index + 1);
 
         if next_point.is_none() {
@@ -104,21 +105,9 @@ impl Car {
 
         let vector = next_point.unwrap() - self.pos;
 
-        if *light == Light::Red && self.is_in_queue()
-        // the car is at the first straight part of the path
-        {
-            // TODO: refactor
-            let border_distance = self.border_distance();
-            if border_distance < STRAIGHT_LENGTH
-                && border_distance + CAR_SPEED * 1.0 + CAR_SAFE_DISTANCE > STRAIGHT_LENGTH
-            {
-                return;
-            }
-        }
-
         if vector.length() < CAR_SPEED * 1.0 {
             self.point_index += 1;
-            self.update(path, next_car, light);
+            self.update(path, next_car);
             return;
         }
 
