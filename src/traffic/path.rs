@@ -1,4 +1,4 @@
-use crate::config::{CAR_PADDING, STRAIGHT_LENGTH, WINDOW_SIZE};
+use crate::config::{CAR_PADDING, ROAD_WIDTH, STRAIGHT_LENGTH, WINDOW_SIZE};
 use crate::traffic::curve::quadratic_curve;
 use crate::traffic::{Direction, Going};
 use macroquad::math::Vec2;
@@ -39,17 +39,109 @@ pub struct Path {
 // C - straight_point(South, D, STRAIGHT_LENGTH)
 
 /// Returns the point on the border where the car should appear or disappear
-fn border_point(coming_from: Direction, right_side: bool) -> Vec2 {
-    let car_padding = if right_side {
-        CAR_PADDING
-    } else {
-        -CAR_PADDING
-    };
-    match coming_from {
-        Direction::North => Vec2::new(WINDOW_SIZE as f32 / 2.0 - car_padding, 0.0),
-        Direction::East => Vec2::new(WINDOW_SIZE as f32, WINDOW_SIZE as f32 / 2.0 - car_padding),
-        Direction::South => Vec2::new(WINDOW_SIZE as f32 / 2.0 + car_padding, WINDOW_SIZE as f32),
-        Direction::West => Vec2::new(0.0, WINDOW_SIZE as f32 / 2.0 + car_padding),
+fn border_point(coming_from: Direction, going_to: Going) -> Vec2 {
+    let lane = (coming_from, going_to);
+
+    match lane {
+        // NORTH -------------------------------------------------------------------------------------
+        (Direction::North, Going::Right) => Vec2::new(
+            WINDOW_SIZE as f32 / 2.0 - ROAD_WIDTH / 2.0 + CAR_PADDING,
+            0.0,
+        ), // YELLOW
+        (Direction::North, Going::Straight) => {
+            Vec2::new(WINDOW_SIZE as f32 / 2.0 - ROAD_WIDTH / 4.0, 0.0)
+        } // BLUE
+        (Direction::North, Going::Left) => Vec2::new(WINDOW_SIZE as f32 / 2.0 - CAR_PADDING, 0.0), // RED
+
+        // EAST --------------------------------------------------------------------------------------
+        (Direction::East, Going::Right) => Vec2::new(
+            WINDOW_SIZE as f32,
+            WINDOW_SIZE as f32 / 2.0 - ROAD_WIDTH / 2.0 + CAR_PADDING,
+        ),
+        (Direction::East, Going::Straight) => Vec2::new(
+            WINDOW_SIZE as f32,
+            WINDOW_SIZE as f32 / 2.0 - ROAD_WIDTH / 4.0,
+        ),
+        (Direction::East, Going::Left) => {
+            Vec2::new(WINDOW_SIZE as f32, WINDOW_SIZE as f32 / 2.0 - CAR_PADDING)
+        }
+
+        // SOUTH -------------------------------------------------------------------------------------
+        (Direction::South, Going::Left) => {
+            Vec2::new(WINDOW_SIZE as f32 / 2.0 + CAR_PADDING, WINDOW_SIZE as f32)
+        }
+        (Direction::South, Going::Straight) => Vec2::new(
+            WINDOW_SIZE as f32 / 2.0 + ROAD_WIDTH / 4.0,
+            WINDOW_SIZE as f32,
+        ),
+        (Direction::South, Going::Right) => Vec2::new(
+            WINDOW_SIZE as f32 / 2.0 + ROAD_WIDTH / 2.0 - CAR_PADDING,
+            WINDOW_SIZE as f32,
+        ),
+
+        // WEST --------------------------------------------------------------------------------------
+        (Direction::West, Going::Left) => Vec2::new(0.0, WINDOW_SIZE as f32 / 2.0 + CAR_PADDING),
+        (Direction::West, Going::Straight) => {
+            Vec2::new(0.0, WINDOW_SIZE as f32 / 2.0 + ROAD_WIDTH / 4.0)
+        }
+        (Direction::West, Going::Right) => Vec2::new(
+            0.0,
+            WINDOW_SIZE as f32 / 2.0 + ROAD_WIDTH / 2.0 - CAR_PADDING,
+        ),
+    }
+}
+
+fn border_end_point(coming_from: Direction, going_to: Going) -> Vec2 {
+    let car_padding = CAR_PADDING;
+
+    let lane = (coming_from, going_to);
+
+    match lane {
+        // NORTH -------------------------------------------------------------------------------------
+        (Direction::North, Going::Right) => Vec2::new(
+            WINDOW_SIZE as f32 / 2.0 + ROAD_WIDTH / 2.0 - car_padding,
+            0.0,
+        ), // YELLOW
+        (Direction::North, Going::Straight) => {
+            Vec2::new(WINDOW_SIZE as f32 / 2.0 + ROAD_WIDTH / 4.0, 0.0)
+        } // BLUE
+        (Direction::North, Going::Left) => Vec2::new(WINDOW_SIZE as f32 / 2.0 + car_padding, 0.0), // RED
+
+        // EAST --------------------------------------------------------------------------------------
+        (Direction::East, Going::Right) => Vec2::new(
+            WINDOW_SIZE as f32,
+            WINDOW_SIZE as f32 / 2.0 + ROAD_WIDTH / 2.0 - car_padding,
+        ),
+        (Direction::East, Going::Straight) => Vec2::new(
+            WINDOW_SIZE as f32,
+            WINDOW_SIZE as f32 / 2.0 + ROAD_WIDTH / 4.0,
+        ),
+        (Direction::East, Going::Left) => {
+            Vec2::new(WINDOW_SIZE as f32, WINDOW_SIZE as f32 / 2.0 + car_padding)
+        }
+
+        // SOUTH -------------------------------------------------------------------------------------
+        (Direction::South, Going::Left) => {
+            Vec2::new(WINDOW_SIZE as f32 / 2.0 - car_padding, WINDOW_SIZE as f32)
+        }
+        (Direction::South, Going::Straight) => Vec2::new(
+            WINDOW_SIZE as f32 / 2.0 - ROAD_WIDTH / 4.0,
+            WINDOW_SIZE as f32,
+        ),
+        (Direction::South, Going::Right) => Vec2::new(
+            WINDOW_SIZE as f32 / 2.0 - ROAD_WIDTH / 2.0 + car_padding,
+            WINDOW_SIZE as f32,
+        ),
+
+        // WEST --------------------------------------------------------------------------------------
+        (Direction::West, Going::Left) => Vec2::new(0.0, WINDOW_SIZE as f32 / 2.0 - car_padding),
+        (Direction::West, Going::Straight) => {
+            Vec2::new(0.0, WINDOW_SIZE as f32 / 2.0 - ROAD_WIDTH / 4.0)
+        }
+        (Direction::West, Going::Right) => Vec2::new(
+            0.0,
+            WINDOW_SIZE as f32 / 2.0 - ROAD_WIDTH / 2.0 + car_padding,
+        ),
     }
 }
 
@@ -67,8 +159,8 @@ impl Path {
     pub fn new(coming_from: Direction, going_to: Going) -> Self {
         let destination = coming_from.destination(going_to);
 
-        let start_point = border_point(coming_from, true);
-        let end_point = border_point(destination, false);
+        let start_point = border_point(coming_from, going_to);
+        let end_point = border_end_point(destination, going_to);
 
         match going_to {
             Going::Straight => Self {
