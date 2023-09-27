@@ -12,31 +12,37 @@ pub struct Path {
     points: Vec<Vec2>,
 }
 
-//                         North
-//                     |  ↓  |  ↑  |
-//                     |  ↓  |  ↑  |
-//                     |     |     |
-//                     |     |     |
-//                     |     |     |
-//                     |     |     |
-//      _______________|     |     |_______________
-//      ← ←                                     ← ←
-// East ---------------             --------------- West
-//      A →            B                        → →
-//      _______________    C        _______________
-//                     |   | |     |
-//                     |   | |     |
-//                     |   | |     |
-//                     |   | |     |
-//                     |   | |     |
-//                     |   ↓ |  ↑  |
-//                     |   D |  ↑  |
-//                         South
-// Path(East, Right) =  [A -> B -> C -> D]
-// A - border_point(East, true)
-// D - border_point(South, false)
-// B - straight_point(East, A, STRAIGHT_LENGTH)
-// C - straight_point(South, D, STRAIGHT_LENGTH)
+//                |   |   |   |   | ^ |   |
+//                |   |   |   |   | ^ |   |
+//                |   |   |   |   | ^ |   |
+//                |r  | s | l |   | ^ |   |
+// _______________| ← | ↓ | → |   | ^ |   |________________
+//                            |     ^      ↑ r
+// _______________            |     ^      ________________
+//                            |     ^      ← s
+// _______________            |     ^      ________________
+//  < < < < < < < < < < < < < < <   ^      ↓ l
+// ___________________________|_^___^______________________
+//            l ↑             | ^   ^
+// _______________            | ^   ^      ________________
+//            s →             | ^   ^
+// _______________            | ^   ^      ________________
+//            r ↓             | ^   ^   > > > > > > > > > >
+// _______________            | ^   ^   ^  ________________
+//                |   |   |   | ← | ↑ | → |
+//                |   |   |   | l | s | r |
+//                |   |   |   |   |   |   |
+//                |   |   |   |   |   |   |
+//                |   |   |   |   |   |   |
+//                |   |   |   |   |   |   |
+//
+// ( r = right, s = straight, l = left )
+//
+// Example:
+// departure from South:
+// first lane - direction: West
+// second lane - direction: North
+// third lane - direction: East
 
 /// Returns the point on the border where the car should appear or disappear
 fn border_point(coming_from: Direction, going_to: Going) -> Vec2 {
