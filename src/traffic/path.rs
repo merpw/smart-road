@@ -175,19 +175,14 @@ impl Path {
 
                 let center = Vec2::new(WINDOW_SIZE as f32 / 2.0, WINDOW_SIZE as f32 / 2.0);
 
+                // vector between curve_start_point and curve_end_point
+                let line = curve_start_point.sub(curve_end_point);
+
+                // perpendicular vector from center to line
+                let radial_vector = Vec2::new(-line.y, line.x);
                 let control_point = match going_to {
-                    Going::Left => center,
-                    Going::Right => {
-                        // make curve radius smaller by half
-
-                        // vector between curve_start_point and curve_end_point
-                        let line = curve_start_point.sub(curve_end_point);
-
-                        // perpendicular vector from center to line
-                        let radial_vector = Vec2::new(-line.y, line.x);
-
-                        center.sub(radial_vector.mul(0.5))
-                    }
+                    Going::Left => center.sub(radial_vector.mul(0.15)),
+                    Going::Right => center.sub(radial_vector.mul(3.5)),
                     _ => unreachable!(),
                 };
 
