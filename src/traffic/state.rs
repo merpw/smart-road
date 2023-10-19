@@ -1,19 +1,16 @@
 use crate::traffic::{Direction, Line};
-use macroquad::prelude::get_frame_time;
 use rand::prelude::IteratorRandom;
 
 #[derive(Debug)]
 pub struct TrafficState {
-    switch_timer: f32,
-
+    //switch_timer: f32,
     pub lines: [Line; 4],
 }
 
 impl TrafficState {
     pub fn new() -> TrafficState {
         TrafficState {
-            switch_timer: 0.0,
-
+            //switch_timer: 0.0,
             lines: [
                 Line::new(Direction::North),
                 Line::new(Direction::East),
@@ -24,7 +21,7 @@ impl TrafficState {
     }
 
     pub fn update(&mut self) {
-        self.switch_timer += get_frame_time();
+        // self.switch_timer += get_frame_time();
 
         self.lines.iter_mut().for_each(|line| line.update());
     }
