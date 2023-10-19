@@ -3,14 +3,12 @@ mod control;
 mod draw;
 mod traffic;
 
-use macroquad::prelude::*;
-
 use config::window_conf;
-
-use control::handle_input;
+use macroquad::prelude::*;
 
 use crate::draw::{draw_path, draw_roads};
 use crate::traffic::TrafficState;
+use control::handle_input;
 use draw::draw_car;
 
 #[macroquad::main(window_conf)]
