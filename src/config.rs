@@ -14,8 +14,9 @@ pub const CAR_LENGTH: f32 = 50.0;
 
 pub const CAR_PADDING: f32 = (ROAD_WIDTH / 2.0 - CAR_WIDTH) / 4.0;
 pub const CAR_SAFE_DISTANCE: f32 = 50.0;
+pub const BUFFER_DISTANCE: f32 = 250.0;
 
-pub const CAR_SPEED: f32 = 3.0;
+pub const MAX_CAR_SPEED: f32 = 3.0;
 
 pub fn window_conf() -> Conf {
     Conf {
