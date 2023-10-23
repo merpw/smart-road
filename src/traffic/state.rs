@@ -23,7 +23,11 @@ impl TrafficState {
     pub fn update(&mut self) {
         // self.switch_timer += get_frame_time();
 
-        self.lines.iter_mut().for_each(|line| line.update());
+        let mut lines = self.lines.clone();
+
+        self.lines
+            .iter_mut()
+            .for_each(|line| line.update(&mut lines));
     }
 
     pub fn add_car(&mut self, coming_from: Direction) {

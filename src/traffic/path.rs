@@ -4,7 +4,7 @@ use crate::traffic::{Direction, Going};
 use macroquad::math::Vec2;
 use std::ops::{Mul, Sub};
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Path {
     pub coming_from: Direction,
     pub going_to: Going,

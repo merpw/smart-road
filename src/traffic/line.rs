@@ -1,7 +1,7 @@
 use crate::config::{CAR_LENGTH, CAR_SAFE_DISTANCE};
 use crate::traffic::{Car, Direction, Going, Path};
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Line {
     pub coming_from: Direction,
 
@@ -33,15 +33,13 @@ impl Line {
         }
     }
 
-    pub fn update(&mut self) {
-        let mut prev_car = None;
+    pub fn update(&mut self, lines: &mut [Line; 4]) {
+        let prev_car = None;
 
         for car in self.cars.iter_mut() {
             let path = get_path(&self.paths, car.going);
 
-            car.update(path, prev_car);
-
-            prev_car = Some(car);
+            car.update(path, prev_car, lines.clone());
         }
 
         self.cleanup_cars();
