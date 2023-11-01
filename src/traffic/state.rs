@@ -1,7 +1,7 @@
 use crate::traffic::{Direction, Line};
 use rand::prelude::IteratorRandom;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct TrafficState {
     //switch_timer: f32,
     pub lines: [Line; 4],
@@ -23,11 +23,11 @@ impl TrafficState {
     pub fn update(&mut self) {
         // self.switch_timer += get_frame_time();
 
-        let mut lines = self.lines.clone();
+        let lines = &self.clone();
 
         self.lines
             .iter_mut()
-            .for_each(|line| line.update(&mut lines));
+            .for_each(|line| line.update(lines));
     }
 
     pub fn add_car(&mut self, coming_from: Direction) {

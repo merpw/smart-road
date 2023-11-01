@@ -1,5 +1,5 @@
 use crate::config::{BUFFER_DISTANCE, CAR_LENGTH, CAR_SAFE_DISTANCE, MAX_CAR_SPEED, WINDOW_SIZE};
-use crate::traffic::{Line, Path};
+use crate::traffic::{Path, TrafficState};
 use macroquad::math::Vec2;
 use rand::Rng;
 
@@ -90,15 +90,15 @@ impl Car {
         }
     }
 
-    pub fn update(&mut self, path: &Path, next_car: Option<&Car>, lines: [Line; 4]) {
+    pub fn update(&mut self, path: &Path, prev_car: Option<&Car>, traffic_state: &TrafficState) {
         let next_point = path.point(self.point_index + 1);
 
         if next_point.is_none() {
             return;
         }
 
-        if let Some(next_car) = next_car {
-            let distance = (next_car.pos - self.pos).length() - CAR_LENGTH;
+        if let Some(prev_car) = prev_car {
+            let distance = (prev_car.pos - self.pos).length() - CAR_LENGTH;
 
             if distance < CAR_SAFE_DISTANCE {
                 return;
@@ -109,10 +109,10 @@ impl Car {
 
         if vector.length() < self.velocity * 1.0 {
             self.point_index += 1;
-            self.update(path, next_car, lines);
+            self.update(path, prev_car, traffic_state);
             return;
         }
-        self.update_velocity(lines);
+        self.update_velocity(traffic_state);
 
         self.rotation = vector.y.atan2(vector.x);
 
@@ -122,33 +122,12 @@ impl Car {
     }
 
     // Obstacles coming from car's right are priority, the car gives way to them
-    pub fn update_velocity(&mut self, lines: [Line; 4]) {
+    pub fn update_velocity(&mut self, traffic_state: &TrafficState) {
         if self.going == Going::Right {
             return;
         }
-        let north_line = lines
-            .iter()
-            .find(|l| l.coming_from == Direction::North)
-            .unwrap()
-            .clone();
 
-        let south_line = lines
-            .iter()
-            .find(|l| l.coming_from == Direction::South)
-            .unwrap()
-            .clone();
-
-        let east_line = lines
-            .iter()
-            .find(|l| l.coming_from == Direction::East)
-            .unwrap()
-            .clone();
-
-        let west_line = lines
-            .iter()
-            .find(|l| l.coming_from == Direction::West)
-            .unwrap()
-            .clone();
+        let [north_line, east_line, south_line, west_line] = &traffic_state.lines;
 
         match self.coming_from {
             Direction::North => {
@@ -238,9 +217,7 @@ impl Car {
                         && self.pos.x <= WINDOW_SIZE as f32 / 2.0 + BUFFER_DISTANCE
                         && obstacle.pos.x <= WINDOW_SIZE as f32 / 2.0 + CAR_LENGTH
                     {
-                        println!("slow down");
                         if obstacle.pos.x - self.pos.x < CAR_SAFE_DISTANCE {
-                            println!("stop");
                             self.velocity = 0.0;
                         } else {
                             self.velocity = 1.0;
@@ -278,7 +255,7 @@ impl Car {
                         if obstacle.pos.x - self.pos.x < CAR_SAFE_DISTANCE
                             && self.going != Going::Left
                             || obstacle.pos.y - self.pos.y < CAR_SAFE_DISTANCE
-                                && self.going == Going::Left
+                            && self.going == Going::Left
                         {
                             self.velocity = 0.0;
                         } else {
@@ -295,7 +272,6 @@ impl Car {
                     {
                         //self.velocity = 1.0;
                         if obstacle.pos.x - self.pos.x < CAR_SAFE_DISTANCE {
-                            println!("stop");
                             self.velocity = 0.0;
                         } else {
                             self.velocity = 1.0;
