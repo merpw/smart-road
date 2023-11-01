@@ -10,7 +10,7 @@ pub struct Line {
     pub paths: [Path; 3],
 }
 
-fn get_path(paths: &[Path; 3], going: Going) -> &Path {
+pub fn get_path(paths: &[Path; 3], going: Going) -> &Path {
     match going {
         Going::Straight => &paths[0],
         Going::Left => &paths[1],

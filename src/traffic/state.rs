@@ -25,9 +25,7 @@ impl TrafficState {
 
         let lines = &self.clone();
 
-        self.lines
-            .iter_mut()
-            .for_each(|line| line.update(lines));
+        self.lines.iter_mut().for_each(|line| line.update(lines));
     }
 
     pub fn add_car(&mut self, coming_from: Direction) {
