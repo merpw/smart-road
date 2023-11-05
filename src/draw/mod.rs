@@ -1,8 +1,9 @@
 mod car;
 mod path;
-mod roads;
 
-pub use roads::draw_roads;
+mod background;
+
+pub use background::draw_background;
 
 pub use car::draw_car;
 
