@@ -1,6 +1,4 @@
-use crate::traffic::line::get_path;
 use crate::traffic::{Car, Direction, Going, Path, TrafficState};
-use std::mem::swap;
 
 impl Path {
     pub fn get_collision_cars<'a>(&'a self, traffic_state: &'a TrafficState) -> Vec<&Car> {
@@ -21,13 +19,55 @@ impl Path {
 
     fn get_collision_paths<'a>(&'a self, traffic_state: &'a TrafficState) -> Vec<&Path> {
         match (self.coming_from, self.going_to) {
-            (_, Going::Right) => vec![],
-            // use all paths for each line in the traffic state
-            _ => traffic_state
-                .lines
-                .iter()
-                .flat_map(|line| line.paths.iter())
-                .collect(),
+            (Direction::North, Going::Left) => vec![
+                &traffic_state.lines[3].paths[1], //west, left
+                &traffic_state.lines[2].paths[0], //south, straight
+                &traffic_state.lines[1].paths[0], //east, straight
+                &traffic_state.lines[1].paths[1], //east, left
+            ],
+            (Direction::North, Going::Straight) => vec![
+                &traffic_state.lines[3].paths[0], //west, straight
+                &traffic_state.lines[3].paths[1], //west, left
+                &traffic_state.lines[1].paths[0], //east, straight
+                &traffic_state.lines[2].paths[1], //south, left
+            ],
+            (Direction::East, Going::Left) => vec![
+                &traffic_state.lines[0].paths[1], //north, left
+                &traffic_state.lines[3].paths[0], //west, straight
+                &traffic_state.lines[2].paths[0], //south, straight
+                &traffic_state.lines[2].paths[1], //south, left
+            ],
+            (Direction::East, Going::Straight) => vec![
+                &traffic_state.lines[0].paths[0], //north, straight
+                &traffic_state.lines[0].paths[1], //north, left
+                &traffic_state.lines[2].paths[0], //south, straight
+                &traffic_state.lines[3].paths[1], //west, left
+            ],
+            (Direction::South, Going::Left) => vec![
+                &traffic_state.lines[1].paths[1], //east, left
+                &traffic_state.lines[0].paths[0], //north, straight
+                &traffic_state.lines[3].paths[0], //west, straight
+                &traffic_state.lines[3].paths[1], //west, left
+            ],
+            (Direction::South, Going::Straight) => vec![
+                &traffic_state.lines[1].paths[0], //east, straight
+                &traffic_state.lines[1].paths[1], //east, left
+                &traffic_state.lines[3].paths[0], //west, straight
+                &traffic_state.lines[0].paths[1], //north, left
+            ],
+            (Direction::West, Going::Left) => vec![
+                &traffic_state.lines[2].paths[1], //south, left
+                &traffic_state.lines[1].paths[0], //east, straight
+                &traffic_state.lines[0].paths[0], //north, straight
+                &traffic_state.lines[0].paths[1], //north, left
+            ],
+            (Direction::West, Going::Straight) => vec![
+                &traffic_state.lines[2].paths[0], //south, straight
+                &traffic_state.lines[2].paths[1], //south, left
+                &traffic_state.lines[0].paths[0], //north, straight
+                &traffic_state.lines[1].paths[1], //east, left
+            ],
+            _ => vec![],
         }
     }
 }
