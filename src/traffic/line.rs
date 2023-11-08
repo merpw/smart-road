@@ -1,5 +1,6 @@
 use crate::config::{CAR_LENGTH, CAR_SAFE_DISTANCE};
 use crate::traffic::{Car, Direction, Going, Path, TrafficState};
+use crate::STATS;
 
 #[derive(Debug, Clone)]
 pub struct Line {
@@ -69,6 +70,10 @@ impl Line {
         let car = Car::new(self.coming_from);
 
         self.cars.push(car);
+
+        unsafe {
+            STATS.car_count += 1;
+        }
     }
 
     pub fn cleanup_cars(&mut self) {
