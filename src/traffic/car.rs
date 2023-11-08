@@ -119,6 +119,7 @@ impl Car {
             if car.coming_from == self.coming_from {
                 continue;
             }
+
             let collision_vector = car.pos - self.pos;
 
             // check if collision_vector is in the same direction as vector

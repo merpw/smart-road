@@ -3,16 +3,11 @@ use crate::traffic::{Car, Going};
 use macroquad::prelude::*;
 use std::ops::Sub;
 
-pub fn draw_car(
-    car: &Car,
-    car_straight_texture: &Texture2D,
-    car_right_texture: &Texture2D,
-    car_left_texture: &Texture2D,
-) {
+pub fn draw_car(car: &Car, car_texture: &(Texture2D, Texture2D, Texture2D)) {
     let texture = match car.going {
-        Going::Straight => car_straight_texture,
-        Going::Right => car_right_texture,
-        Going::Left => car_left_texture,
+        Going::Straight => &car_texture.0,
+        Going::Right => &car_texture.1,
+        Going::Left => &car_texture.2,
     };
 
     let move_vector = Vec2::new(
