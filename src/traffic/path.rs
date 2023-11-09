@@ -53,11 +53,11 @@ fn border_point(coming_from: Direction, going_to: Going) -> Vec2 {
         (Direction::North, Going::Right) => Vec2::new(
             WINDOW_SIZE as f32 / 2.0 - ROAD_WIDTH / 2.0 + CAR_PADDING,
             0.0,
-        ), // YELLOW
+        ),
         (Direction::North, Going::Straight) => {
             Vec2::new(WINDOW_SIZE as f32 / 2.0 - ROAD_WIDTH / 4.0, 0.0)
-        } // BLUE
-        (Direction::North, Going::Left) => Vec2::new(WINDOW_SIZE as f32 / 2.0 - CAR_PADDING, 0.0), // RED
+        }
+        (Direction::North, Going::Left) => Vec2::new(WINDOW_SIZE as f32 / 2.0 - CAR_PADDING, 0.0),
 
         // EAST --------------------------------------------------------------------------------------
         (Direction::East, Going::Right) => Vec2::new(
@@ -107,11 +107,11 @@ fn border_end_point(coming_from: Direction, going_to: Going) -> Vec2 {
         (Direction::North, Going::Right) => Vec2::new(
             WINDOW_SIZE as f32 / 2.0 + ROAD_WIDTH / 2.0 - car_padding,
             0.0,
-        ), // YELLOW
+        ),
         (Direction::North, Going::Straight) => {
             Vec2::new(WINDOW_SIZE as f32 / 2.0 + ROAD_WIDTH / 4.0, 0.0)
-        } // BLUE
-        (Direction::North, Going::Left) => Vec2::new(WINDOW_SIZE as f32 / 2.0 + car_padding, 0.0), // RED
+        }
+        (Direction::North, Going::Left) => Vec2::new(WINDOW_SIZE as f32 / 2.0 + car_padding, 0.0),
 
         // EAST --------------------------------------------------------------------------------------
         (Direction::East, Going::Right) => Vec2::new(
