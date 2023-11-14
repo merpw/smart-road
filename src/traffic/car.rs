@@ -55,6 +55,13 @@ pub struct Car {
     point_index: usize,
 }
 
+#[derive(Eq, PartialEq, Copy, Clone)]
+pub enum CarStatus {
+    BeforeTurn,
+    Turning,
+    AfterTurn,
+}
+
 impl Car {
     pub fn new(path: Rc<Path>) -> Car {
         let first_point = path.point(0).unwrap();
@@ -78,246 +85,53 @@ impl Car {
         }
     }
 
-    pub fn update(&mut self, prev_car: Option<&Car>, traffic_state: &TrafficState) {
+    pub fn get_move_vector(&self) -> Option<Vec2> {
         let next_point = self.path.point(self.point_index + 1);
 
-        if next_point.is_none() {
-            return;
-        }
+        next_point.map(|next_point| next_point - self.pos)
+    }
 
+    pub fn get_status(&self) -> CarStatus {
+        let total_points = self.path.points().len();
+
+        match self.point_index {
+            0 => CarStatus::BeforeTurn,
+            i if i < total_points - 1 => CarStatus::Turning,
+            _ => CarStatus::AfterTurn,
+        }
+    }
+
+    pub fn update(&mut self, prev_car: Option<&Car>, traffic_state: &TrafficState) {
+        if let Some(move_vector) = self.get_move_vector() {
+            if move_vector.length() < self.velocity * 1.0 {
+                self.point_index += 1;
+                self.update(prev_car, traffic_state);
+                return;
+            }
+
+            self.velocity = self.calculate_velocity(prev_car, traffic_state);
+
+            let move_vector = move_vector.normalize();
+
+            self.rotation = move_vector.y.atan2(move_vector.x);
+            self.pos += move_vector * self.velocity;
+        }
+    }
+
+    pub fn calculate_velocity(&self, prev_car: Option<&Car>, traffic_state: &TrafficState) -> f32 {
         if let Some(prev_car) = prev_car {
             let distance = (prev_car.pos - self.pos).length() - CAR_LENGTH;
 
             if distance < CAR_SAFE_DISTANCE {
-                return;
+                return 0.0;
             }
         }
 
-        let vector = next_point.unwrap() - self.pos;
-
-        if vector.length() < self.velocity * 1.0 {
-            self.point_index += 1;
-            self.update(prev_car, traffic_state);
-            return;
+        if self.get_status() == CarStatus::Turning {
+            return 0.0;
         }
-        self.update_velocity(traffic_state);
 
-        self.rotation = vector.y.atan2(vector.x);
-
-        let vector = vector.normalize();
-
-        self.pos += vector * self.velocity;
-    }
-
-    // Obstacles coming from car's right are priority, the car gives way to them
-    pub fn update_velocity(&mut self, _traffic_state: &TrafficState) {
-        // if self.going == Going::Right {
-        //     return;
-        // }
-        //
-        // let [north_line, east_line, south_line, west_line] = &traffic_state.lines;
-        //
-        // match self.coming_from {
-        //     Direction::North => {
-        //         let west_obstacle = west_line
-        //             .cars
-        //             .iter()
-        //             .find(|c| c.going != Going::Right && c.pos.x < self.pos.x);
-        //
-        //         let south_obstacle = south_line.cars.iter().find(|c| {
-        //             self.going == Going::Left
-        //                 && c.going == Going::Straight
-        //                 && c.pos.y + CAR_LENGTH > self.pos.y
-        //         });
-        //
-        //         // __________________________________Lane at car's right (Car from North, obstacle from West)
-        //         if let Some(obstacle) = west_obstacle {
-        //             if self.going == Going::Left && obstacle.going == Going::Straight {
-        //                 return;
-        //             }
-        //             if self.pos.y <= obstacle.pos.y
-        //                 && obstacle.pos.x + BUFFER_DISTANCE >= self.pos.x
-        //                 && self.pos.y + BUFFER_DISTANCE >= obstacle.pos.y
-        //                 && self.pos.x < WINDOW_SIZE as f32 / 2.0
-        //                 && obstacle.pos.y > WINDOW_SIZE as f32 / 2.0 - BUFFER_DISTANCE
-        //             {
-        //                 if obstacle.pos.y - self.pos.y < CAR_SAFE_DISTANCE
-        //                     && self.going == Going::Left
-        //                 {
-        //                     self.velocity = 0.0;
-        //                 } else {
-        //                     self.velocity = 1.0;
-        //                 }
-        //             } else {
-        //                 self.velocity = MAX_CAR_SPEED;
-        //             }
-        //             // _________Car turning left, Obstacle from South going straight, Obstacle intersecting the car from car's right
-        //         } else if let Some(obstacle) = south_obstacle {
-        //             if self.pos.x <= obstacle.pos.x
-        //                 && obstacle.pos.y - BUFFER_DISTANCE <= self.pos.y
-        //                 && self.pos.y >= WINDOW_SIZE as f32 / 2.0 - BUFFER_DISTANCE
-        //                 && obstacle.pos.x >= WINDOW_SIZE as f32 / 2.0 - CAR_LENGTH
-        //             {
-        //                 if obstacle.pos.x - self.pos.x < CAR_SAFE_DISTANCE {
-        //                     self.velocity = 0.0;
-        //                 } else {
-        //                     self.velocity = 1.0;
-        //                 }
-        //             } else {
-        //                 self.velocity = MAX_CAR_SPEED;
-        //             }
-        //         } else {
-        //             self.velocity = MAX_CAR_SPEED;
-        //         }
-        //     }
-        //     Direction::East => {
-        //         let north_obstacle = north_line
-        //             .cars
-        //             .iter()
-        //             .find(|c| c.going != Going::Right && c.pos.y - CAR_LENGTH < self.pos.y);
-        //         let west_obstacle = west_line.cars.iter().find(|c| {
-        //             self.going == Going::Left
-        //                 && c.going == Going::Straight
-        //                 && c.pos.x - CAR_LENGTH < self.pos.x
-        //         });
-        //
-        //         if let Some(obstacle) = north_obstacle {
-        //             if self.going == Going::Left && obstacle.going == Going::Straight {
-        //                 return;
-        //             }
-        //             if self.pos.x >= obstacle.pos.x
-        //                 && obstacle.pos.y + BUFFER_DISTANCE >= self.pos.y
-        //                 && self.pos.x - BUFFER_DISTANCE <= obstacle.pos.x
-        //                 && self.pos.y < WINDOW_SIZE as f32 / 2.0
-        //             //&& obstacle.pos.y < WINDOW_SIZE as f32 / 2.0 + BUFFER_DISTANCE
-        //             {
-        //                 if obstacle.pos.x - self.pos.x < CAR_SAFE_DISTANCE {
-        //                     self.velocity = 0.0;
-        //                 } else {
-        //                     self.velocity = 1.0;
-        //                 }
-        //             } else {
-        //                 self.velocity = MAX_CAR_SPEED;
-        //             }
-        //         } else if let Some(obstacle) = west_obstacle {
-        //             if self.pos.y <= obstacle.pos.y
-        //                 && obstacle.pos.x + BUFFER_DISTANCE >= self.pos.x
-        //                 && self.pos.x <= WINDOW_SIZE as f32 / 2.0 + BUFFER_DISTANCE
-        //                 && obstacle.pos.x <= WINDOW_SIZE as f32 / 2.0 + CAR_LENGTH
-        //             {
-        //                 if obstacle.pos.x - self.pos.x < CAR_SAFE_DISTANCE {
-        //                     self.velocity = 0.0;
-        //                 } else {
-        //                     self.velocity = 1.0;
-        //                 }
-        //             } else {
-        //                 self.velocity = MAX_CAR_SPEED;
-        //             }
-        //         } else {
-        //             self.velocity = MAX_CAR_SPEED;
-        //         }
-        //     }
-        //     Direction::South => {
-        //         let east_obstacle = east_line
-        //             .cars
-        //             .iter()
-        //             .find(|c| c.going != Going::Right && c.pos.x + CAR_LENGTH > self.pos.x);
-        //
-        //         let north_obstacle = north_line.cars.iter().find(|c| {
-        //             self.going == Going::Left
-        //                 && c.going == Going::Straight
-        //                 && c.pos.y - CAR_LENGTH < self.pos.y
-        //         });
-        //
-        //         if let Some(obstacle) = east_obstacle {
-        //             if self.going == Going::Left && obstacle.going == Going::Straight {
-        //                 return;
-        //             }
-        //             if self.pos.y >= obstacle.pos.y
-        //                 && obstacle.pos.x - BUFFER_DISTANCE <= self.pos.x
-        //                 && self.pos.y - BUFFER_DISTANCE <= obstacle.pos.y
-        //                 && self.pos.x > WINDOW_SIZE as f32 / 2.0
-        //                 && obstacle.pos.y < WINDOW_SIZE as f32 / 2.0 + BUFFER_DISTANCE
-        //             {
-        //                 //self.velocity = 1.0;
-        //                 if obstacle.pos.x - self.pos.x < CAR_SAFE_DISTANCE
-        //                     && self.going != Going::Left
-        //                     || obstacle.pos.y - self.pos.y < CAR_SAFE_DISTANCE
-        //                         && self.going == Going::Left
-        //                 {
-        //                     self.velocity = 0.0;
-        //                 } else {
-        //                     self.velocity = 1.0;
-        //                 }
-        //             } else {
-        //                 self.velocity = MAX_CAR_SPEED;
-        //             }
-        //         } else if let Some(obstacle) = north_obstacle {
-        //             if self.pos.x >= obstacle.pos.x
-        //                 && obstacle.pos.y + BUFFER_DISTANCE >= self.pos.y
-        //                 && self.pos.y <= WINDOW_SIZE as f32 / 2.0 + BUFFER_DISTANCE
-        //                 && obstacle.pos.x <= WINDOW_SIZE as f32 / 2.0 + CAR_LENGTH
-        //             {
-        //                 //self.velocity = 1.0;
-        //                 if obstacle.pos.x - self.pos.x < CAR_SAFE_DISTANCE {
-        //                     self.velocity = 0.0;
-        //                 } else {
-        //                     self.velocity = 1.0;
-        //                 }
-        //             } else {
-        //                 self.velocity = MAX_CAR_SPEED;
-        //             }
-        //         } else {
-        //             self.velocity = MAX_CAR_SPEED;
-        //         }
-        //     }
-        //     Direction::West => {
-        //         let south_obstacle = south_line.cars.iter().find(|c| {
-        //             //self.going != Going::Right
-        //             c.going != Going::Right && c.pos.y + CAR_LENGTH >= self.pos.y
-        //         });
-        //         let east_obstacle = east_line.cars.iter().find(|c| {
-        //             self.going == Going::Left
-        //                 && c.going == Going::Straight
-        //                 && c.pos.x + CAR_LENGTH > self.pos.x
-        //         });
-        //
-        //         if let Some(obstacle) = south_obstacle {
-        //             if self.going == Going::Left && obstacle.going == Going::Straight {
-        //                 return;
-        //             }
-        //             if self.pos.x <= obstacle.pos.x
-        //                 && obstacle.pos.y - BUFFER_DISTANCE <= self.pos.y
-        //                 && self.pos.x + BUFFER_DISTANCE >= obstacle.pos.x
-        //                 && self.pos.y > WINDOW_SIZE as f32 / 2.0
-        //             //&& obstacle.pos.x > WINDOW_SIZE as f32 / 2.0 - BUFFER_DISTANCE
-        //             {
-        //                 if obstacle.pos.x - self.pos.x < CAR_SAFE_DISTANCE {
-        //                     self.velocity = 0.0;
-        //                 } else {
-        //                     self.velocity = 1.0;
-        //                 }
-        //             } else {
-        //                 self.velocity = MAX_CAR_SPEED;
-        //             }
-        //         } else if let Some(obstacle) = east_obstacle {
-        //             if self.pos.y >= obstacle.pos.y
-        //                 && obstacle.pos.x - BUFFER_DISTANCE <= self.pos.x
-        //                 && self.pos.x >= WINDOW_SIZE as f32 / 2.0 - BUFFER_DISTANCE
-        //                 && obstacle.pos.x >= WINDOW_SIZE as f32 / 2.0 - CAR_LENGTH
-        //             {
-        //                 if obstacle.pos.x - self.pos.x < CAR_SAFE_DISTANCE {
-        //                     self.velocity = 0.0;
-        //                 } else {
-        //                     self.velocity = 1.0;
-        //                 }
-        //             } else {
-        //                 self.velocity = MAX_CAR_SPEED;
-        //             }
-        //         } else {
-        //             self.velocity = MAX_CAR_SPEED;
-        //         }
-        //     }
+        MAX_CAR_SPEED
     }
 
     pub fn is_done(&self) -> bool {
