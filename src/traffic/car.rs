@@ -1,14 +1,18 @@
-use crate::config::{CAR_LENGTH, CAR_SAFE_DISTANCE, MAX_CAR_SPEED, WINDOW_SIZE};
-use crate::traffic::{Path, TrafficState};
+use crate::config::{
+    CAR_ACCELERATION, CAR_BREAKING_ACCELERATION, CAR_LENGTH, CAR_SAFE_DISTANCE,
+    MAX_CAR_SPEED_AFTER_TURN, MAX_CAR_SPEED_BEFORE_TURN, STRAIGHT_LENGTH, WINDOW_SIZE,
+};
+use crate::traffic::car::CarStatus::{AfterTurn, BeforeTurn, Turning};
+use crate::traffic::{Line, Path, TrafficState};
 use macroquad::math::Vec2;
 use std::rc::Rc;
 
 #[derive(Debug, Eq, PartialEq, Clone, Copy)]
 pub enum Direction {
-    North,
-    East,
-    South,
-    West,
+    North = 0,
+    East = 1,
+    South = 2,
+    West = 3,
 }
 
 impl Direction {
@@ -72,7 +76,7 @@ impl Car {
 
             pos: first_point,
             rotation: 0.0,
-            velocity: MAX_CAR_SPEED,
+            velocity: MAX_CAR_SPEED_AFTER_TURN,
         }
     }
 
@@ -103,13 +107,13 @@ impl Car {
 
     pub fn update(&mut self, prev_car: Option<&Car>, traffic_state: &TrafficState) {
         if let Some(move_vector) = self.get_move_vector() {
+            self.velocity = self.calculate_velocity(prev_car, traffic_state);
+
             if move_vector.length() < self.velocity * 1.0 {
                 self.point_index += 1;
                 self.update(prev_car, traffic_state);
                 return;
             }
-
-            self.velocity = self.calculate_velocity(prev_car, traffic_state);
 
             let move_vector = move_vector.normalize();
 
@@ -119,19 +123,42 @@ impl Car {
     }
 
     pub fn calculate_velocity(&self, prev_car: Option<&Car>, traffic_state: &TrafficState) -> f32 {
+        let velocity = self.velocity.max(1.0);
+
         if let Some(prev_car) = prev_car {
             let distance = (prev_car.pos - self.pos).length() - CAR_LENGTH;
 
             if distance < CAR_SAFE_DISTANCE {
                 return 0.0;
             }
+
+            if distance < CAR_SAFE_DISTANCE * 2.0 {
+                return (velocity * (1.0 - CAR_BREAKING_ACCELERATION))
+                    .min(MAX_CAR_SPEED_BEFORE_TURN);
+            }
         }
 
-        if self.get_status() == CarStatus::Turning {
-            return 0.0;
+        let status = self.get_status();
+
+        if status != BeforeTurn {
+            return (velocity * (1.0 + CAR_ACCELERATION)).min(MAX_CAR_SPEED_AFTER_TURN);
         }
 
-        MAX_CAR_SPEED
+        let collision_paths = self.path.get_used_collision_paths(traffic_state);
+
+        if !collision_paths.is_empty() {
+            let center_distance = STRAIGHT_LENGTH - self.border_distance();
+
+            if center_distance < CAR_SAFE_DISTANCE / 2.0 {
+                return 0.0;
+            }
+            if center_distance < CAR_SAFE_DISTANCE {
+                return (velocity * (1.0 - CAR_BREAKING_ACCELERATION))
+                    .min(MAX_CAR_SPEED_BEFORE_TURN);
+            }
+        }
+
+        (velocity * (1.0 + CAR_ACCELERATION)).min(MAX_CAR_SPEED_BEFORE_TURN)
     }
 
     pub fn is_done(&self) -> bool {

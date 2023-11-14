@@ -26,11 +26,11 @@ impl Line {
             path_cars: [vec![], vec![], vec![]],
         }
     }
-    pub fn path_cars(&self, path: &Rc<Path>) -> &Vec<Car> {
+    pub fn path_cars(&self, path: &Path) -> &Vec<Car> {
         &self.path_cars[path.going_to as usize]
     }
 
-    pub fn path_cars_mut(&mut self, path: &Rc<Path>) -> &mut Vec<Car> {
+    pub fn path_cars_mut(&mut self, path: &Path) -> &mut Vec<Car> {
         &mut self.path_cars[path.going_to as usize]
     }
 
