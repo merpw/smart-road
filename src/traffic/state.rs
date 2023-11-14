@@ -1,5 +1,7 @@
-use crate::traffic::{Direction, Line};
-use rand::prelude::IteratorRandom;
+use crate::traffic::{Direction, Line, Path};
+
+use macroquad::rand::ChooseRandom;
+use std::rc::Rc;
 
 #[derive(Debug, Clone)]
 pub struct TrafficState {
@@ -25,30 +27,34 @@ impl TrafficState {
 
         let lines = &self.clone();
 
-        self.lines
-            .iter_mut()
-            .for_each(|line| line.update(lines));
+        self.lines.iter_mut().for_each(|line| line.update(lines));
     }
 
     pub fn add_car(&mut self, coming_from: Direction) {
-        let line = self
-            .lines
-            .iter_mut()
-            .find(|line| line.coming_from == coming_from)
-            .unwrap();
+        let line = &mut self.lines[coming_from as usize];
 
-        line.add_car();
+        let available_paths = line.get_free_paths();
+
+        if let Some(path) = available_paths.choose() {
+            line.add_car(path.clone());
+        }
     }
 
     pub fn add_car_random(&mut self) {
-        let available_lines = self
+        let available_line_paths: Vec<(usize /* line_index */, Rc<Path>)> = self
             .lines
-            .iter_mut()
-            .filter(|line| line.can_add_car())
-            .choose(&mut rand::thread_rng());
+            .iter()
+            .enumerate()
+            .flat_map(|(line_index, line)| {
+                line.get_free_paths()
+                    .iter()
+                    .map(|path| (line_index, path.clone()))
+                    .collect::<Vec<_>>()
+            })
+            .collect();
 
-        if let Some(line) = available_lines {
-            line.add_car();
+        if let Some((line_index, path)) = available_line_paths.choose() {
+            self.lines[*line_index].add_car(path.clone());
         }
     }
 }

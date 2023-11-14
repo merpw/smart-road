@@ -6,7 +6,7 @@ use std::ops::Sub;
 use macroquad::shapes::{draw_rectangle_ex, DrawRectangleParams};
 
 pub fn draw_car(car: &Car) {
-    let color = match car.going {
+    let color = match car.path.going_to {
         Going::Straight => BLUE,
         Going::Right => YELLOW,
         Going::Left => RED,

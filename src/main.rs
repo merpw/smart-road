@@ -27,12 +27,8 @@ async fn main() {
         for line in traffic_state.lines.iter() {
             for path in line.paths.iter() {
                 draw_path(path);
-            }
-        }
 
-        for line in traffic_state.lines.iter() {
-            for car in line.cars.iter() {
-                draw_car(car);
+                line.path_cars(path).iter().for_each(draw_car);
             }
         }
 
