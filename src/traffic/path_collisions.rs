@@ -4,7 +4,7 @@ use std::rc::Rc;
 
 impl Path {
     /// Returns all paths that collide with this path and have a car that is turning (possible collision)
-    pub fn get_used_collision_paths(&self, traffic_state: &TrafficState) -> Vec<Rc<Path>> {
+    pub fn get_potential_collision_paths(&self, traffic_state: &TrafficState) -> Vec<Rc<Path>> {
         self.get_intersected_paths(traffic_state)
             .iter()
             .filter(|path| {

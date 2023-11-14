@@ -144,7 +144,7 @@ impl Car {
             return (velocity * (1.0 + CAR_ACCELERATION)).min(MAX_CAR_SPEED_AFTER_TURN);
         }
 
-        let collision_paths = self.path.get_used_collision_paths(traffic_state);
+        let collision_paths = self.path.get_potential_collision_paths(traffic_state);
 
         if !collision_paths.is_empty() {
             let center_distance = STRAIGHT_LENGTH - self.border_distance();
