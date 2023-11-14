@@ -1,37 +1,17 @@
+mod app;
 mod config;
-mod control;
 mod draw;
 mod traffic;
 
+use app::*;
 use config::window_conf;
-use macroquad::prelude::*;
+use once_cell::sync::Lazy;
 
-use crate::draw::{draw_path, draw_roads};
-use crate::traffic::TrafficState;
-use control::handle_input;
-use draw::draw_car;
+pub static mut STATS: Lazy<Statistics> = Lazy::new(Statistics::default);
 
 #[macroquad::main(window_conf)]
 async fn main() {
-    let mut traffic_state = TrafficState::new();
+    let mut smart_road = App::new().await;
 
-    loop {
-        handle_input(&mut traffic_state);
-
-        traffic_state.update();
-
-        clear_background(BLACK);
-
-        draw_roads();
-
-        for line in traffic_state.lines.iter() {
-            for path in line.paths.iter() {
-                draw_path(path);
-
-                line.path_cars(path).iter().for_each(draw_car);
-            }
-        }
-
-        next_frame().await
-    }
+    smart_road.run().await;
 }

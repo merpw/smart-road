@@ -1,12 +1,12 @@
 use crate::traffic::{Going, Path};
-use macroquad::color::{Color, BLUE, RED, YELLOW};
+use macroquad::color::{Color, LIME, PURPLE, YELLOW};
 use macroquad::prelude::draw_line;
 
 pub fn draw_path(path: &Path) {
     let color = match path.going_to {
-        Going::Straight => Color::new(BLUE.r, BLUE.g, BLUE.b, 0.5),
-        Going::Right => Color::new(YELLOW.r, YELLOW.g, YELLOW.b, 0.5),
-        Going::Left => Color::new(RED.r, RED.g, RED.b, 0.5),
+        Going::Straight => Color::new(YELLOW.r, YELLOW.g, YELLOW.b, 0.1),
+        Going::Right => Color::new(LIME.r, LIME.g, LIME.b, 0.15),
+        Going::Left => Color::new(PURPLE.r, PURPLE.g, PURPLE.b, 0.2),
     };
 
     let points = path.points();

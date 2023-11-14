@@ -2,8 +2,8 @@ use crate::config::{
     CAR_ACCELERATION, CAR_BREAKING_ACCELERATION, CAR_LENGTH, CAR_SAFE_DISTANCE,
     MAX_CAR_SPEED_AFTER_TURN, MAX_CAR_SPEED_BEFORE_TURN, STRAIGHT_LENGTH, WINDOW_SIZE,
 };
-use crate::traffic::car::CarStatus::{AfterTurn, BeforeTurn, Turning};
-use crate::traffic::{Line, Path, TrafficState};
+use crate::traffic::car::CarStatus::BeforeTurn;
+use crate::traffic::{Path, TrafficState};
 use macroquad::math::Vec2;
 use std::rc::Rc;
 
