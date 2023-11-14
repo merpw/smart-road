@@ -4,7 +4,7 @@ use crate::traffic::{Direction, Going};
 use macroquad::math::Vec2;
 use std::ops::{Mul, Sub};
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct Path {
     pub coming_from: Direction,
     pub going_to: Going,
@@ -28,7 +28,7 @@ pub struct Path {
 //            s →             | ^   ^
 // _______________            | ^   ^      ________________
 //            r ↓             | ^   ^   > > > > > > > > > >
-// _______________            | ^   ^   ^  ________________
+// _______________            | 1   2   3  ________________
 //                |   |   |   | ← | ↑ | → |
 //                |   |   |   | l | s | r |
 //                |   |   |   |   |   |   |
@@ -49,17 +49,15 @@ fn border_point(coming_from: Direction, going_to: Going) -> Vec2 {
     let lane = (coming_from, going_to);
 
     match lane {
-        // NORTH -------------------------------------------------------------------------------------
         (Direction::North, Going::Right) => Vec2::new(
             WINDOW_SIZE as f32 / 2.0 - ROAD_WIDTH / 2.0 + CAR_PADDING,
             0.0,
-        ), // YELLOW
+        ),
         (Direction::North, Going::Straight) => {
             Vec2::new(WINDOW_SIZE as f32 / 2.0 - ROAD_WIDTH / 4.0, 0.0)
-        } // BLUE
-        (Direction::North, Going::Left) => Vec2::new(WINDOW_SIZE as f32 / 2.0 - CAR_PADDING, 0.0), // RED
+        }
+        (Direction::North, Going::Left) => Vec2::new(WINDOW_SIZE as f32 / 2.0 - CAR_PADDING, 0.0),
 
-        // EAST --------------------------------------------------------------------------------------
         (Direction::East, Going::Right) => Vec2::new(
             WINDOW_SIZE as f32,
             WINDOW_SIZE as f32 / 2.0 - ROAD_WIDTH / 2.0 + CAR_PADDING,
@@ -72,7 +70,6 @@ fn border_point(coming_from: Direction, going_to: Going) -> Vec2 {
             Vec2::new(WINDOW_SIZE as f32, WINDOW_SIZE as f32 / 2.0 - CAR_PADDING)
         }
 
-        // SOUTH -------------------------------------------------------------------------------------
         (Direction::South, Going::Left) => {
             Vec2::new(WINDOW_SIZE as f32 / 2.0 + CAR_PADDING, WINDOW_SIZE as f32)
         }
@@ -85,7 +82,6 @@ fn border_point(coming_from: Direction, going_to: Going) -> Vec2 {
             WINDOW_SIZE as f32,
         ),
 
-        // WEST --------------------------------------------------------------------------------------
         (Direction::West, Going::Left) => Vec2::new(0.0, WINDOW_SIZE as f32 / 2.0 + CAR_PADDING),
         (Direction::West, Going::Straight) => {
             Vec2::new(0.0, WINDOW_SIZE as f32 / 2.0 + ROAD_WIDTH / 4.0)
@@ -103,17 +99,15 @@ fn border_end_point(coming_from: Direction, going_to: Going) -> Vec2 {
     let lane = (coming_from, going_to);
 
     match lane {
-        // NORTH -------------------------------------------------------------------------------------
         (Direction::North, Going::Right) => Vec2::new(
             WINDOW_SIZE as f32 / 2.0 + ROAD_WIDTH / 2.0 - car_padding,
             0.0,
-        ), // YELLOW
+        ),
         (Direction::North, Going::Straight) => {
             Vec2::new(WINDOW_SIZE as f32 / 2.0 + ROAD_WIDTH / 4.0, 0.0)
-        } // BLUE
-        (Direction::North, Going::Left) => Vec2::new(WINDOW_SIZE as f32 / 2.0 + car_padding, 0.0), // RED
+        }
+        (Direction::North, Going::Left) => Vec2::new(WINDOW_SIZE as f32 / 2.0 + car_padding, 0.0),
 
-        // EAST --------------------------------------------------------------------------------------
         (Direction::East, Going::Right) => Vec2::new(
             WINDOW_SIZE as f32,
             WINDOW_SIZE as f32 / 2.0 + ROAD_WIDTH / 2.0 - car_padding,
@@ -126,7 +120,6 @@ fn border_end_point(coming_from: Direction, going_to: Going) -> Vec2 {
             Vec2::new(WINDOW_SIZE as f32, WINDOW_SIZE as f32 / 2.0 + car_padding)
         }
 
-        // SOUTH -------------------------------------------------------------------------------------
         (Direction::South, Going::Left) => {
             Vec2::new(WINDOW_SIZE as f32 / 2.0 - car_padding, WINDOW_SIZE as f32)
         }
@@ -139,7 +132,6 @@ fn border_end_point(coming_from: Direction, going_to: Going) -> Vec2 {
             WINDOW_SIZE as f32,
         ),
 
-        // WEST --------------------------------------------------------------------------------------
         (Direction::West, Going::Left) => Vec2::new(0.0, WINDOW_SIZE as f32 / 2.0 - car_padding),
         (Direction::West, Going::Straight) => {
             Vec2::new(0.0, WINDOW_SIZE as f32 / 2.0 - ROAD_WIDTH / 4.0)
@@ -173,7 +165,12 @@ impl Path {
                 coming_from,
                 going_to,
 
-                points: vec![start_point, end_point],
+                points: vec![
+                    start_point,
+                    straight_point(coming_from, start_point),
+                    straight_point(destination, end_point),
+                    end_point,
+                ],
             },
             Going::Left | Going::Right => {
                 let curve_start_point = straight_point(coming_from, start_point);
