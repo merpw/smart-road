@@ -12,7 +12,6 @@ pub struct TrafficState {
 impl TrafficState {
     pub fn new() -> TrafficState {
         TrafficState {
-            //switch_timer: 0.0,
             lines: [
                 Line::new(Direction::North),
                 Line::new(Direction::East),
@@ -23,8 +22,6 @@ impl TrafficState {
     }
 
     pub fn update(&mut self) {
-        // self.switch_timer += get_frame_time();
-
         // TODO: consider performance optimizations
 
         let mut traffic_state;
