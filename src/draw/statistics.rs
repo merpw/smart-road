@@ -16,8 +16,8 @@ pub fn draw_statistics() {
         format!("Car count: {}", unsafe { STATS.car_count }),
         format!("Max speed: {}", unsafe { STATS.max_speed }),
         format!("Min speed: {}", unsafe { STATS.min_speed }),
-        format!("Max time: {}", unsafe { STATS.max_time }),
-        format!("Min time: {}", unsafe { STATS.min_time }),
+        format!("Max time: {:.0} sec.", unsafe { STATS.max_time }),
+        format!("Min time: {:.0} sec.", unsafe { STATS.min_time }),
         format!("Close calls: {}", unsafe { STATS.close_calls }),
         format!("Collisions: {}", unsafe { STATS.collision_count }),
     ];
