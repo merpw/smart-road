@@ -5,9 +5,6 @@ mod traffic;
 
 use app::*;
 use config::window_conf;
-use once_cell::sync::Lazy;
-
-pub static mut STATS: Lazy<Statistics> = Lazy::new(Statistics::default);
 
 #[macroquad::main(window_conf)]
 async fn main() {

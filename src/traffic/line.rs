@@ -1,5 +1,6 @@
 use crate::config::{CAR_LENGTH, CAR_SAFE_DISTANCE};
 use crate::traffic::{Car, Direction, Going, Path, TrafficState};
+use std::rc::Rc;
 
 #[derive(Debug, Clone)]
 pub struct Line {
@@ -7,7 +8,7 @@ pub struct Line {
 
     pub paths: [Rc<Path>; 3],
 
-    path_cars: [Vec<Car>; 3],
+    pub path_cars: [Vec<Car>; 3],
 }
 
 impl Line {
@@ -70,10 +71,6 @@ impl Line {
         let car = Car::new(path.clone());
 
         self.path_cars_mut(&path).push(car);
-
-        unsafe {
-            STATS.car_count += 1;
-        }
     }
 
     pub fn cleanup_cars(&mut self) {

@@ -6,6 +6,9 @@ use crate::traffic::car::CarStatus::BeforeTurn;
 use crate::traffic::{Path, TrafficState};
 use macroquad::math::Vec2;
 use std::rc::Rc;
+use std::sync::atomic::{AtomicUsize, Ordering};
+
+static CAR_ID: AtomicUsize = AtomicUsize::new(0);
 
 #[derive(Debug, Eq, PartialEq, Clone, Copy)]
 pub enum Direction {
@@ -46,6 +49,8 @@ pub enum Going {
 
 #[derive(Debug, Clone)]
 pub struct Car {
+    pub id: usize,
+
     pub path: Rc<Path>,
 
     pub velocity: f32,
@@ -71,6 +76,7 @@ impl Car {
         let first_point = path.point(0).unwrap();
 
         Self {
+            id: CAR_ID.fetch_add(1, Ordering::SeqCst),
             path,
             point_index: 0,
 

@@ -1,5 +1,6 @@
 use crate::traffic::{Direction, Line, Path};
 
+use crate::app::Statistics;
 use macroquad::rand::ChooseRandom;
 use std::rc::Rc;
 
@@ -7,6 +8,8 @@ use std::rc::Rc;
 pub struct TrafficState {
     //switch_timer: f32,
     pub lines: [Line; 4],
+
+    pub statistics: Statistics,
 }
 
 impl TrafficState {
@@ -18,6 +21,8 @@ impl TrafficState {
                 Line::new(Direction::South),
                 Line::new(Direction::West),
             ],
+
+            statistics: Statistics::default(),
         }
     }
 
@@ -25,14 +30,19 @@ impl TrafficState {
         // TODO: consider performance optimizations
 
         let mut traffic_state;
+        traffic_state = self.clone();
 
         for i in 0..self.lines.len() {
-            traffic_state = self.clone();
             self.lines[i].update(&traffic_state);
+            traffic_state = self.clone();
         }
+
+        self.statistics.update(&traffic_state);
     }
 
     pub fn add_car(&mut self, coming_from: Direction) {
+        self.statistics.car_count += 1;
+
         let line = &mut self.lines[coming_from as usize];
 
         let available_paths = line.get_free_paths();
@@ -57,6 +67,7 @@ impl TrafficState {
 
         if let Some((line_index, path)) = available_line_paths.choose() {
             self.lines[*line_index].add_car(path.clone());
+            self.statistics.car_count += 1;
         }
     }
 }

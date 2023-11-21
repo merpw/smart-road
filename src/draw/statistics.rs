@@ -1,5 +1,5 @@
+use crate::app::Statistics;
 use crate::config::WINDOW_SIZE;
-use crate::STATS;
 use macroquad::prelude::*;
 
 fn draw_centered_text(text: &str, y: f32, size: f32, color: Color) {
@@ -8,18 +8,18 @@ fn draw_centered_text(text: &str, y: f32, size: f32, color: Color) {
     draw_text(text, x, y, size, color);
 }
 
-pub fn draw_statistics() {
+pub fn draw_statistics(statistics: &Statistics) {
     clear_background(BLACK);
     let header_text = "Statistics".to_string();
 
-    let statistics = [
-        format!("Car count: {}", unsafe { STATS.car_count }),
-        format!("Max speed: {}", unsafe { STATS.max_speed }),
-        format!("Min speed: {}", unsafe { STATS.min_speed }),
-        format!("Max time: {:.0} sec.", unsafe { STATS.max_time }),
-        format!("Min time: {:.0} sec.", unsafe { STATS.min_time }),
-        format!("Close calls: {}", unsafe { STATS.close_calls }),
-        format!("Collisions: {}", unsafe { STATS.collision_count }),
+    let messages = [
+        format!("Car count: {}", statistics.car_count),
+        format!("Max speed: {}", statistics.max_speed),
+        format!("Min speed: {}", statistics.min_speed),
+        format!("Max time: {:.0} sec.", statistics.max_time),
+        format!("Min time: {:.0} sec.", statistics.min_time),
+        format!("Close calls: {}", statistics.close_calls.len()),
+        format!("Collisions: {}", statistics.collisions.len()),
     ];
 
     let text_size = 24.0;
@@ -29,7 +29,7 @@ pub fn draw_statistics() {
 
     draw_centered_text(&header_text, text_y_start, 30.0, RED);
 
-    for (index, stat) in statistics.iter().enumerate() {
+    for (index, stat) in messages.iter().enumerate() {
         let y = text_y_start + (index as f32 + 1.0) * line_height;
         draw_centered_text(stat, y, text_size, text_color);
     }

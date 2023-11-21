@@ -1,7 +1,6 @@
 use crate::app::control::*;
 use crate::draw::*;
 use crate::traffic::TrafficState;
-use crate::STATS;
 use macroquad::prelude::*;
 use std::path::PathBuf;
 
@@ -31,21 +30,24 @@ impl App {
     pub async fn run(&mut self) {
         loop {
             handle_input(&mut self.traffic_state);
-            if unsafe { STATS.is_open } {
-                draw_statistics();
-            } else {
-                self.traffic_state.update();
 
-                draw_background(&self.background_texture);
+            if self.traffic_state.statistics.is_open {
+                draw_statistics(&self.traffic_state.statistics);
+                next_frame().await;
+                continue;
+            }
 
-                for line in self.traffic_state.lines.iter() {
-                    for path in line.paths.iter() {
-                        draw_path(path);
+            self.traffic_state.update();
 
-                        line.path_cars(path).iter().for_each(|car| {
-                            draw_car(car, &self.car_textures);
-                        });
-                    }
+            draw_background(&self.background_texture);
+
+            for line in self.traffic_state.lines.iter() {
+                for path in line.paths.iter() {
+                    draw_path(path);
+
+                    line.path_cars(path).iter().for_each(|car| {
+                        draw_car(car, &self.car_textures);
+                    });
                 }
             }
             next_frame().await;
