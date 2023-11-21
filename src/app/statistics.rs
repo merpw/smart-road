@@ -32,6 +32,9 @@ impl Statistics {
             if car.velocity > self.max_speed {
                 self.max_speed = car.velocity;
             }
+            if car.id == 0 && cars.len() == 1 && self.min_speed == 0.0 {
+                self.min_speed = self.max_speed;
+            }
             if car.velocity < self.min_speed {
                 self.min_speed = car.velocity;
             }
