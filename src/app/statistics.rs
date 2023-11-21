@@ -1,7 +1,5 @@
 #[derive(Clone, Copy, Default)]
 pub struct Statistics {
-    pub show_statistics: bool,
-
     pub car_count: usize,
     pub max_speed: f32,
     pub min_speed: f32,
