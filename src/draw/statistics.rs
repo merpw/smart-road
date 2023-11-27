@@ -22,8 +22,15 @@ pub fn draw_statistics(statistics: &Statistics) {
         format!("Collisions: {}", statistics.collisions.len()),
     ];
 
+    let christmas = format!("Days until Christmas: {:.0}", statistics.christmas);
+
     let text_size = 24.0;
     let text_color = WHITE;
+    let christmas_color = if statistics.christmas < 1.0 {
+        RED
+    } else {
+        GREEN
+    };
     let text_y_start = WINDOW_SIZE as f32 / 2.5;
     let line_height = 30.0;
 
@@ -33,4 +40,11 @@ pub fn draw_statistics(statistics: &Statistics) {
         let y = text_y_start + (index as f32 + 1.0) * line_height;
         draw_centered_text(stat, y, text_size, text_color);
     }
+
+    draw_centered_text(
+        &christmas,
+        text_y_start + (messages.len() as f32 + 1.0) * line_height,
+        text_size,
+        christmas_color,
+    );
 }

@@ -1,5 +1,6 @@
 use crate::config::{CAR_LENGTH, CAR_SAFE_DISTANCE};
 use crate::traffic::{Car, TrafficState};
+use chrono::{Datelike, TimeZone};
 use macroquad::prelude::get_time;
 
 #[derive(Debug, Clone, Default)]
@@ -15,6 +16,8 @@ pub struct Statistics {
 
     pub is_open: bool,
     pub pause_time: f32,
+
+    pub christmas: f32,
 }
 
 impl Statistics {
@@ -64,5 +67,13 @@ impl Statistics {
                 }
             }
         }
+
+        let now = chrono::Local::now();
+        let christmas = chrono::Local
+            .with_ymd_and_hms(now.year(), 12, 25, 0, 0, 0)
+            .unwrap();
+        let days = christmas.signed_duration_since(now).num_days();
+
+        self.christmas = days as f32;
     }
 }
