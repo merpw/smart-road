@@ -7,7 +7,7 @@ pub fn handle_input(traffic_state: &mut TrafficState) {
     }
 
     if is_key_pressed(KeyCode::P) {
-        traffic_state.statistics.toggle()
+        traffic_state.toggle_pause();
     }
 
     if traffic_state.statistics.is_open {

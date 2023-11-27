@@ -1,6 +1,7 @@
 use crate::traffic::{Direction, Line, Path};
 
 use crate::app::Statistics;
+use macroquad::prelude::get_time;
 use macroquad::rand::ChooseRandom;
 use std::rc::Rc;
 
@@ -10,6 +11,8 @@ pub struct TrafficState {
     pub lines: [Line; 4],
 
     pub statistics: Statistics,
+
+    pub pause_time: f64,
 }
 
 impl TrafficState {
@@ -23,7 +26,28 @@ impl TrafficState {
             ],
 
             statistics: Statistics::default(),
+
+            pause_time: get_time(),
         }
+    }
+
+    pub fn toggle_pause(&mut self) {
+        self.statistics.is_open = !self.statistics.is_open;
+
+        if self.statistics.is_open {
+            self.pause_time = get_time();
+            return;
+        }
+
+        let pause_duration = get_time() - self.pause_time;
+
+        self.lines.iter_mut().for_each(|line| {
+            line.path_cars.iter_mut().for_each(|cars| {
+                cars.iter_mut().for_each(|car| {
+                    car.start_time += pause_duration;
+                });
+            });
+        });
     }
 
     pub fn update(&mut self) {

@@ -1,26 +1,23 @@
 use crate::config::{CAR_LENGTH, CAR_SAFE_DISTANCE};
 use crate::traffic::{Car, TrafficState};
+use macroquad::prelude::get_time;
 
 #[derive(Debug, Clone, Default)]
 pub struct Statistics {
     pub car_count: usize,
     pub max_speed: f32,
     pub min_speed: f32,
-    pub max_time: f32,
-    pub min_time: f32,
+    pub max_time: f64,
+    pub min_time: f64,
 
     pub collisions: Vec<(usize, usize)>,
     pub close_calls: Vec<(usize, usize)>,
 
     pub is_open: bool,
-    pub timer: f32,
+    pub pause_time: f32,
 }
 
 impl Statistics {
-    pub fn toggle(&mut self) {
-        self.is_open = !self.is_open;
-    }
-
     pub fn update(&mut self, traffic_state: &TrafficState) {
         let cars = traffic_state
             .lines
@@ -30,8 +27,6 @@ impl Statistics {
             .collect::<Vec<&Car>>();
 
         for (i, car) in cars.iter().enumerate() {
-            update_time_stats(self);
-
             if car.velocity > self.max_speed {
                 self.max_speed = car.velocity;
             }
@@ -56,15 +51,18 @@ impl Statistics {
                     self.close_calls.push((car.id, other_car.id));
                 }
             }
-        }
-    }
-}
 
-fn update_time_stats(statistics: &mut Statistics) {
-    if statistics.timer > statistics.max_time {
-        statistics.max_time = statistics.timer
-    }
-    if statistics.timer < statistics.min_time || statistics.min_time == 0.0 {
-        statistics.min_time = statistics.timer
+            if car.is_done() {
+                let car_time = get_time() - car.start_time;
+
+                if car_time > self.max_time {
+                    self.max_time = car_time;
+                }
+
+                if car_time < self.min_time || self.min_time == 0.0 {
+                    self.min_time = car_time;
+                }
+            }
+        }
     }
 }

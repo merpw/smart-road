@@ -1,7 +1,5 @@
-use crate::app::Statistics;
 use crate::config::{CAR_LENGTH, CAR_SAFE_DISTANCE};
 use crate::traffic::{Car, Direction, Going, Path, TrafficState};
-use macroquad::prelude::*;
 use std::rc::Rc;
 
 #[derive(Debug, Clone)]
@@ -35,7 +33,9 @@ impl Line {
         &mut self.path_cars[path.going_to as usize]
     }
 
-    pub fn update(&mut self, traffic_state: &TrafficState, stats: &mut Statistics) {
+    pub fn update(&mut self, traffic_state: &TrafficState) {
+        self.cleanup_cars();
+
         for path in self.paths.iter() {
             let cars = &mut self.path_cars[path.going_to as usize];
 
@@ -44,15 +44,9 @@ impl Line {
             for car in cars.iter_mut() {
                 car.update(prev_car, traffic_state);
 
-                if car.is_done() {
-                    stats.timer = get_time() as f32 - car.start_time;
-                }
-
                 prev_car = Some(car);
             }
         }
-
-        self.cleanup_cars();
     }
 
     pub fn get_free_paths(&self) -> Vec<Rc<Path>> {

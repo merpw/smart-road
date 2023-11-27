@@ -64,7 +64,7 @@ pub struct Car {
 
     point_index: usize,
 
-    pub start_time: f32,
+    pub start_time: f64,
 }
 
 #[derive(Eq, PartialEq, Copy, Clone)]
@@ -82,7 +82,7 @@ impl Car {
             id: CAR_ID.fetch_add(1, Ordering::SeqCst),
             path,
             point_index: 0,
-            start_time: get_time() as f32,
+            start_time: get_time(),
 
             pos: first_point,
             rotation: 0.0,
