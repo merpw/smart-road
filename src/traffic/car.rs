@@ -5,6 +5,7 @@ use crate::config::{
 use crate::traffic::car::CarStatus::BeforeTurn;
 use crate::traffic::{Path, TrafficState};
 use macroquad::math::Vec2;
+use macroquad::prelude::*;
 use std::rc::Rc;
 use std::sync::atomic::{AtomicUsize, Ordering};
 
@@ -62,6 +63,8 @@ pub struct Car {
     pub rotation: f32,
 
     point_index: usize,
+
+    pub start_time: f32,
 }
 
 #[derive(Eq, PartialEq, Copy, Clone)]
@@ -79,6 +82,7 @@ impl Car {
             id: CAR_ID.fetch_add(1, Ordering::SeqCst),
             path,
             point_index: 0,
+            start_time: get_time() as f32,
 
             pos: first_point,
             rotation: 0.0,

@@ -13,6 +13,7 @@ pub struct Statistics {
     pub close_calls: Vec<(usize, usize)>,
 
     pub is_open: bool,
+    pub timer: f32,
 }
 
 impl Statistics {
@@ -29,6 +30,8 @@ impl Statistics {
             .collect::<Vec<&Car>>();
 
         for (i, car) in cars.iter().enumerate() {
+            update_time_stats(self);
+
             if car.velocity > self.max_speed {
                 self.max_speed = car.velocity;
             }
@@ -54,5 +57,14 @@ impl Statistics {
                 }
             }
         }
+    }
+}
+
+fn update_time_stats(statistics: &mut Statistics) {
+    if statistics.timer > statistics.max_time {
+        statistics.max_time = statistics.timer
+    }
+    if statistics.timer < statistics.min_time || statistics.min_time == 0.0 {
+        statistics.min_time = statistics.timer
     }
 }
