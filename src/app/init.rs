@@ -8,6 +8,7 @@ pub struct App {
     pub traffic_state: TrafficState,
     pub background_texture: Texture2D,
     pub car_textures: (Texture2D, Texture2D, Texture2D),
+    pub font: Option<Font>,
 }
 
 impl App {
@@ -19,11 +20,13 @@ impl App {
             load_texture_from_assets("car_green.png").await.unwrap(),
             load_texture_from_assets("car_violet.png").await.unwrap(),
         );
+        let font = load_ttf_font("./assets/PlaypenSans.ttf").await.ok();
 
         Self {
             traffic_state,
             background_texture,
             car_textures,
+            font,
         }
     }
 
@@ -32,7 +35,7 @@ impl App {
             handle_input(&mut self.traffic_state);
 
             if self.traffic_state.statistics.is_open {
-                draw_statistics(&self.traffic_state.statistics);
+                draw_statistics(&self.traffic_state.statistics, self.font.as_ref());
                 next_frame().await;
                 continue;
             }

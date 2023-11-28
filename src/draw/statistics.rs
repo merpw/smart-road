@@ -2,13 +2,20 @@ use crate::app::Statistics;
 use crate::config::WINDOW_SIZE;
 use macroquad::prelude::*;
 
-fn draw_centered_text(text: &str, y: f32, size: f32, color: Color) {
-    let text_width = measure_text(text, None, size as u16, 1.0).width;
+fn draw_centered_text(text: &str, y: f32, size: f32, color: Color, font: Option<&Font>) {
+    let text_width = measure_text(text, font, size as u16, 1.0).width;
     let x = WINDOW_SIZE as f32 / 2.0 - text_width / 2.0;
-    draw_text(text, x, y, size, color);
+    let params = TextParams {
+        font_size: size as u16,
+        font,
+        color,
+        ..Default::default()
+    };
+
+    draw_text_ex(text, x, y, params);
 }
 
-pub fn draw_statistics(statistics: &Statistics) {
+pub fn draw_statistics(statistics: &Statistics, font: Option<&Font>) {
     clear_background(BLACK);
     let header_text = "Statistics".to_string();
 
@@ -24,21 +31,17 @@ pub fn draw_statistics(statistics: &Statistics) {
 
     let christmas = format!("Days until Christmas: {:.0}", statistics.christmas);
 
-    let text_size = 24.0;
+    let text_size = 17.0;
     let text_color = WHITE;
-    let christmas_color = if statistics.christmas < 1.0 {
-        RED
-    } else {
-        GREEN
-    };
+    let christmas_color = GREEN;
     let text_y_start = WINDOW_SIZE as f32 / 2.5;
     let line_height = 30.0;
 
-    draw_centered_text(&header_text, text_y_start, 30.0, RED);
+    draw_centered_text(&header_text, text_y_start, 30.0, RED, font);
 
     for (index, stat) in messages.iter().enumerate() {
         let y = text_y_start + (index as f32 + 1.0) * line_height;
-        draw_centered_text(stat, y, text_size, text_color);
+        draw_centered_text(stat, y, text_size, text_color, font);
     }
 
     draw_centered_text(
@@ -46,5 +49,6 @@ pub fn draw_statistics(statistics: &Statistics) {
         text_y_start + (messages.len() as f32 + 1.0) * line_height,
         text_size,
         christmas_color,
+        font,
     );
 }
