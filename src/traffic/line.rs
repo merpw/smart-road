@@ -1,95 +1,81 @@
 use crate::config::{CAR_LENGTH, CAR_SAFE_DISTANCE};
-use crate::traffic::{Car, Direction, Going, Path};
+use crate::traffic::{Car, Direction, Going, Path, TrafficState};
+use std::rc::Rc;
 
-#[derive(Debug, Eq, PartialEq)]
-pub enum Light {
-    Red,
-    Green,
-}
-
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Line {
     pub coming_from: Direction,
 
-    pub cars: Vec<Car>,
-    pub light: Light,
+    pub paths: [Rc<Path>; 3],
 
-    pub paths: [Path; 3],
-}
-
-fn get_path(paths: &[Path; 3], going: Going) -> &Path {
-    match going {
-        Going::Straight => &paths[0],
-        Going::Left => &paths[1],
-        Going::Right => &paths[2],
-    }
+    pub path_cars: [Vec<Car>; 3],
 }
 
 impl Line {
-    pub fn new(coming_from: Direction, light: Light) -> Self {
+    pub fn new(coming_from: Direction) -> Self {
         Line {
             coming_from,
-            light,
-
-            cars: Vec::new(),
 
             paths: [
-                Path::new(coming_from, Going::Straight),
-                Path::new(coming_from, Going::Left),
-                Path::new(coming_from, Going::Right),
+                Rc::new(Path::new(coming_from, Going::Straight)),
+                Rc::new(Path::new(coming_from, Going::Left)),
+                Rc::new(Path::new(coming_from, Going::Right)),
             ],
+
+            path_cars: [vec![], vec![], vec![]],
         }
     }
-
-    pub fn switch(&mut self) {
-        self.light = match self.light {
-            Light::Red => Light::Green,
-            Light::Green => Light::Red,
-        }
+    pub fn path_cars(&self, path: &Path) -> &Vec<Car> {
+        &self.path_cars[path.going_to as usize]
     }
 
-    pub fn update(&mut self) {
-        let mut prev_car = None;
+    pub fn path_cars_mut(&mut self, path: &Path) -> &mut Vec<Car> {
+        &mut self.path_cars[path.going_to as usize]
+    }
 
-        for car in self.cars.iter_mut() {
-            let path = get_path(&self.paths, car.going);
-
-            car.update(path, prev_car, &self.light);
-
-            prev_car = Some(car);
-        }
-
+    pub fn update(&mut self, traffic_state: &TrafficState) {
         self.cleanup_cars();
+
+        for path in self.paths.iter() {
+            let cars = &mut self.path_cars[path.going_to as usize];
+
+            let mut prev_car: Option<&Car> = None;
+
+            for car in cars.iter_mut() {
+                car.update(prev_car, traffic_state);
+
+                prev_car = Some(car);
+            }
+        }
     }
 
-    pub fn can_add_car(&self) -> bool {
-        let prev_car = self
-            .cars
+    pub fn get_free_paths(&self) -> Vec<Rc<Path>> {
+        self.paths
             .iter()
-            .rfind(|c| c.coming_from == self.coming_from);
+            .filter(|path| {
+                let cars = self.path_cars(path);
 
-        if prev_car.is_none() {
-            return true;
-        }
+                if let Some(car) = cars.last() {
+                    if car.border_distance() < CAR_LENGTH + CAR_SAFE_DISTANCE {
+                        return false;
+                    }
+                }
 
-        let prev_car = prev_car.unwrap();
-
-        prev_car.border_distance() >= CAR_LENGTH + CAR_SAFE_DISTANCE
+                true
+            })
+            .cloned()
+            .collect()
     }
 
-    pub fn add_car(&mut self) {
-        if !self.can_add_car() {
-            return;
-        }
-        let car = Car::new(self.coming_from);
+    pub fn add_car(&mut self, path: Rc<Path>) {
+        let car = Car::new(path.clone());
 
-        self.cars.push(car);
+        self.path_cars_mut(&path).push(car);
     }
 
     pub fn cleanup_cars(&mut self) {
-        self.cars.retain(|car| {
-            let path = get_path(&self.paths, car.going);
-            !car.is_done(path)
-        })
+        self.path_cars.iter_mut().for_each(|cars| {
+            cars.retain(|car| !car.is_done());
+        });
     }
 }

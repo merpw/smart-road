@@ -6,6 +6,14 @@ pub fn handle_input(traffic_state: &mut TrafficState) {
         std::process::exit(0);
     }
 
+    if is_key_pressed(KeyCode::P) {
+        traffic_state.toggle_pause();
+    }
+
+    if traffic_state.statistics.is_open {
+        return;
+    }
+
     if is_key_pressed(KeyCode::Up) {
         traffic_state.add_car(Direction::South);
     }

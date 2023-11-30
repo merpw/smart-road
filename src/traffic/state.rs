@@ -1,89 +1,97 @@
-use crate::traffic::{Direction, Light, Line};
-use macroquad::prelude::get_frame_time;
+use crate::traffic::{Direction, Line, Path};
 
-use crate::config::{BOTTOM_RIGHT, LIGHTS_TIMEOUT, TOP_LEFT};
-use rand::prelude::IteratorRandom;
+use crate::app::Statistics;
+use macroquad::prelude::get_time;
+use macroquad::rand::ChooseRandom;
+use std::rc::Rc;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct TrafficState {
-    switch_timer: f32,
-
+    //switch_timer: f32,
     pub lines: [Line; 4],
+
+    pub statistics: Statistics,
+
+    pub pause_time: f64,
 }
 
 impl TrafficState {
     pub fn new() -> TrafficState {
         TrafficState {
-            switch_timer: 0.0,
-
             lines: [
-                Line::new(Direction::North, Light::Green),
-                Line::new(Direction::East, Light::Red),
-                Line::new(Direction::South, Light::Red),
-                Line::new(Direction::West, Light::Red),
+                Line::new(Direction::North),
+                Line::new(Direction::East),
+                Line::new(Direction::South),
+                Line::new(Direction::West),
             ],
+
+            statistics: Statistics::default(),
+
+            pause_time: get_time(),
         }
     }
 
-    fn update_lights(&mut self) {
-        self.lines.iter_mut().for_each(|line| {
-            if line.light == Light::Green {
-                line.switch();
-            }
-        });
+    pub fn toggle_pause(&mut self) {
+        self.statistics.is_open = !self.statistics.is_open;
 
-        let is_car_in_intersection = self.lines.iter().any(|line| {
-            line.cars.iter().any(|car| {
-                matches!((car.pos.x, car.pos.y), (x, y) if x > TOP_LEFT.x
-                        && y > TOP_LEFT.y
-                        && x < BOTTOM_RIGHT.x
-                        && y < BOTTOM_RIGHT.y)
-            })
-        });
-
-        if is_car_in_intersection {
+        if self.statistics.is_open {
+            self.pause_time = get_time();
             return;
         }
 
-        let biggest_queue = self
-            .lines
-            .iter_mut()
-            .max_by(|line1, line2| line1.cars.len().cmp(&line2.cars.len()))
-            .unwrap();
+        let pause_duration = get_time() - self.pause_time;
 
-        biggest_queue.switch();
-        self.switch_timer = 0.0;
+        self.lines.iter_mut().for_each(|line| {
+            line.path_cars.iter_mut().for_each(|cars| {
+                cars.iter_mut().for_each(|car| {
+                    car.start_time += pause_duration;
+                });
+            });
+        });
     }
 
     pub fn update(&mut self) {
-        self.switch_timer += get_frame_time();
+        // TODO: consider performance optimizations
 
-        if self.switch_timer > LIGHTS_TIMEOUT {
-            self.update_lights();
+        let mut traffic_state;
+        traffic_state = self.clone();
+
+        for i in 0..self.lines.len() {
+            self.lines[i].update(&traffic_state);
+            traffic_state = self.clone();
         }
 
-        self.lines.iter_mut().for_each(|line| line.update());
+        self.statistics.update(&traffic_state);
     }
 
     pub fn add_car(&mut self, coming_from: Direction) {
-        let line = self
-            .lines
-            .iter_mut()
-            .find(|line| line.coming_from == coming_from)
-            .unwrap();
+        self.statistics.car_count += 1;
 
-        line.add_car();
+        let line = &mut self.lines[coming_from as usize];
+
+        let available_paths = line.get_free_paths();
+
+        if let Some(path) = available_paths.choose() {
+            line.add_car(path.clone());
+        }
     }
 
     pub fn add_car_random(&mut self) {
-        let available_lines = self
+        let available_line_paths: Vec<(usize /* line_index */, Rc<Path>)> = self
             .lines
-            .iter_mut()
-            .filter(|line| line.can_add_car())
-            .choose(&mut rand::thread_rng());
+            .iter()
+            .enumerate()
+            .flat_map(|(line_index, line)| {
+                line.get_free_paths()
+                    .iter()
+                    .map(|path| (line_index, path.clone()))
+                    .collect::<Vec<_>>()
+            })
+            .collect();
 
-        if let Some(line) = available_lines {
-            line.add_car();
+        if let Some((line_index, path)) = available_line_paths.choose() {
+            self.lines[*line_index].add_car(path.clone());
+            self.statistics.car_count += 1;
         }
     }
 }
