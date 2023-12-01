@@ -1,3 +1,4 @@
+mod audio;
 mod control;
 mod init;
 mod statistics;

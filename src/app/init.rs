@@ -1,6 +1,8 @@
+use crate::app::audio::play_soundtrack;
 use crate::app::control::*;
 use crate::draw::*;
 use crate::traffic::TrafficState;
+use macroquad::audio::*;
 use macroquad::prelude::*;
 use std::path::PathBuf;
 
@@ -9,6 +11,7 @@ pub struct App {
     pub background_texture: Texture2D,
     pub car_textures: (Texture2D, Texture2D, Texture2D),
     pub font: Option<Font>,
+    pub soundtrack: Sound,
 }
 
 impl App {
@@ -21,16 +24,21 @@ impl App {
             load_texture_from_assets("car_violet.png").await.unwrap(),
         );
         let font = load_ttf_font("./assets/PlaypenSans.ttf").await.ok();
+        let soundtrack = load_sound("./assets/christmas_soundtrack.wav")
+            .await
+            .expect("Failed to load soundtrack");
 
         Self {
             traffic_state,
             background_texture,
             car_textures,
             font,
+            soundtrack,
         }
     }
 
     pub async fn run(&mut self) {
+        play_soundtrack(&self.soundtrack);
         loop {
             handle_input(&mut self.traffic_state);
 
