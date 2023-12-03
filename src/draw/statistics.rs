@@ -1,5 +1,6 @@
 use crate::app::Statistics;
 use crate::config::WINDOW_SIZE;
+use crate::draw::background_statistics::draw_statistics_background;
 use macroquad::prelude::*;
 
 fn draw_centered_text(text: &str, y: f32, size: f32, color: Color, font: Option<&Font>) {
@@ -15,8 +16,8 @@ fn draw_centered_text(text: &str, y: f32, size: f32, color: Color, font: Option<
     draw_text_ex(text, x, y, params);
 }
 
-pub fn draw_statistics(statistics: &Statistics, font: Option<&Font>) {
-    clear_background(BLACK);
+pub fn draw_statistics(statistics: &Statistics, background: &Texture2D, font: Option<&Font>) {
+    draw_statistics_background(background);
     let header_text = "Statistics".to_string();
 
     let messages = [
@@ -33,11 +34,16 @@ pub fn draw_statistics(statistics: &Statistics, font: Option<&Font>) {
 
     let text_size = 17.0;
     let text_color = WHITE;
-    let christmas_color = GREEN;
     let text_y_start = WINDOW_SIZE as f32 / 2.5;
     let line_height = 30.0;
 
-    draw_centered_text(&header_text, text_y_start, 30.0, RED, font);
+    draw_centered_text(
+        &header_text,
+        text_y_start,
+        30.0,
+        Color::from_rgba(163, 180, 203, 225),
+        font,
+    );
 
     for (index, stat) in messages.iter().enumerate() {
         let y = text_y_start + (index as f32 + 1.0) * line_height;
@@ -48,7 +54,7 @@ pub fn draw_statistics(statistics: &Statistics, font: Option<&Font>) {
         &christmas,
         text_y_start + (messages.len() as f32 + 1.0) * line_height,
         text_size,
-        christmas_color,
+        Color::from_rgba(205, 255, 244, 255),
         font,
     );
 }
