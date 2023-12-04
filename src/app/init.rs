@@ -23,9 +23,9 @@ impl App {
             .await
             .unwrap();
         let car_textures = (
+            load_texture_from_assets("car_blue.png").await.unwrap(),
             load_texture_from_assets("car_yellow.png").await.unwrap(),
-            load_texture_from_assets("car_green.png").await.unwrap(),
-            load_texture_from_assets("car_violet.png").await.unwrap(),
+            load_texture_from_assets("car_pink.png").await.unwrap(),
         );
         let font = load_ttf_font("./assets/PlaypenSans.ttf").await.ok();
         let soundtrack = load_sound("./assets/christmas_soundtrack.wav")
