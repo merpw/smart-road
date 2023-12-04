@@ -1,4 +1,5 @@
 mod background;
+mod background_statistics;
 mod car;
 mod path;
 mod statistics;
